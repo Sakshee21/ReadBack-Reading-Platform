@@ -57,6 +57,9 @@ export const api = {
   getChapters: (bookId) => request(`/books/${bookId}`),
   getReaderPosition: (bookId) => request(`/books/${bookId}/reader`),
   getProgress: (bookId) => request(`/books/${bookId}/progress`),
+  listMicroSessions: (bookId) => request(`/books/${bookId}/micro-sessions`),
+  jumpToMicroSession: (bookId, microSessionId) =>
+    request(`/books/${bookId}/jump`, { method: "POST", body: { micro_session_id: microSessionId } }),
 
   startSession: (bookId, microSessionId) =>
     request("/sessions/start", { method: "POST", body: { book_id: bookId, micro_session_id: microSessionId } }),

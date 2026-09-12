@@ -7,6 +7,7 @@ import AutoplayCountdown from "../components/AutoplayCountdown";
 import RSVPMode from "../components/RSVPMode";
 import CheckpointQuiz from "../components/CheckpointQuiz";
 import StreakDisplay from "../components/StreakDisplay";
+import SessionDrawer from "../components/SessionDrawer";
 
 export default function Reader() {
   const { bookId } = useParams();
@@ -18,6 +19,8 @@ export default function Reader() {
   const [awaitingManualContinue, setAwaitingManualContinue] = useState(false);
   const [bookFinished, setBookFinished] = useState(false);
   const [error, setError] = useState("");
+  const [sessionList, setSessionList] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const startedForMicroSession = useRef(null);
 
   useEffect(() => {
@@ -43,6 +46,17 @@ export default function Reader() {
       .catch((err) => setError(err.message || "Could not start session"));
   }, [position, bookId]);
 
+  // Keep the "jump to any session" drawer's completed/current markers fresh.
+  useEffect(() => {
+    if (!position) return;
+    api.listMicroSessions(bookId).then(setSessionList).catch(() => {});
+  }, [position, bookId]);
+
+  // Always start a newly-shown micro-session scrolled to the top.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [position?.micro_session?.id]);
+
   const advanceToNextPosition = useCallback(() => {
     api
       .getReaderPosition(bookId)
@@ -52,6 +66,37 @@ export default function Reader() {
       })
       .catch((err) => setError(err.message || "Could not load next session"));
   }, [bookId]);
+
+  const jumpTo = useCallback(
+    (microSessionId) => {
+      api
+        .jumpToMicroSession(bookId, microSessionId)
+        .then((pos) => {
+          setPosition(pos);
+          setSessionId(null);
+          setAwaitingManualContinue(false);
+          setCountdownActive(false);
+          setRsvpActive(false);
+        })
+        .catch((err) => setError(err.message || "Could not jump to that session"));
+    },
+    [bookId]
+  );
+
+  function handlePrevious() {
+    const current = sessionList.find((item) => item.is_current);
+    if (!current) return;
+    const previous = sessionList.find((item) => item.session_number === current.session_number - 1);
+    if (previous) jumpTo(previous.id);
+  }
+
+  function handleDrawerSelect(microSessionId) {
+    setDrawerOpen(false);
+    jumpTo(microSessionId);
+  }
+
+  const currentSessionNumber = sessionList.find((item) => item.is_current)?.session_number;
+  const isFirstSession = currentSessionNumber === 1;
 
   async function handleFinishMicroSession() {
     if (!sessionId) return;
@@ -111,6 +156,9 @@ export default function Reader() {
           >
             RSVP mode
           </button>
+          <button className="icon-btn" onClick={() => setDrawerOpen(true)}>
+            Sessions
+          </button>
           <Link to="/library" className="icon-btn">
             Library
           </Link>
@@ -137,6 +185,9 @@ export default function Reader() {
       </div>
 
       <div className="reader-footer">
+        <button className="btn-secondary" onClick={handlePrevious} disabled={isFirstSession || !currentSessionNumber}>
+          Previous
+        </button>
         {awaitingManualContinue ? (
           <button
             className="btn-primary"
@@ -167,6 +218,13 @@ export default function Reader() {
           }}
         />
       )}
+
+      <SessionDrawer
+        open={drawerOpen}
+        items={sessionList}
+        onClose={() => setDrawerOpen(false)}
+        onSelect={handleDrawerSelect}
+      />
     </div>
   );
 }

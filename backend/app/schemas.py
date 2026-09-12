@@ -54,6 +54,20 @@ class MicroSessionOut(BaseModel):
         from_attributes = True
 
 
+class MicroSessionListItemOut(BaseModel):
+    id: int
+    session_number: int
+    chapter_index: int
+    chapter_title: str
+    preview: str
+    completed: bool
+    is_current: bool
+
+
+class JumpRequest(BaseModel):
+    micro_session_id: int
+
+
 class ChapterOut(BaseModel):
     id: int
     index: int

@@ -9,8 +9,10 @@ from app.deps import get_current_user
 from app.models import (
     Book,
     Chapter,
+    CheckpointAttempt,
     ComprehensionCheckpoint,
     MicroSession,
+    ReadingSession,
     User,
     UserBookProgress,
 )
@@ -18,6 +20,8 @@ from app.schemas import (
     BookOut,
     CheckpointOut,
     ChapterOut,
+    JumpRequest,
+    MicroSessionListItemOut,
     MicroSessionOut,
     ProgressOut,
     ReaderPositionOut,
@@ -98,7 +102,6 @@ def _checkpoint_due(db: Session, user: User, book: Book, chapter: Chapter, micro
     )
     if not checkpoint:
         return None
-    from app.models import CheckpointAttempt
 
     already_attempted = (
         db.query(CheckpointAttempt)
@@ -110,20 +113,9 @@ def _checkpoint_due(db: Session, user: User, book: Book, chapter: Chapter, micro
     return checkpoint
 
 
-@router.get("/{book_id}/reader", response_model=ReaderPositionOut)
-def get_reader_position(
-    book_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
-):
-    book = db.get(Book, book_id)
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    if not book.chapters:
-        raise HTTPException(status_code=422, detail="Book has no content")
-
-    progress = _get_or_create_progress(db, user, book)
-    micro_session = db.get(MicroSession, progress.current_micro_session_id)
-    if not micro_session:
-        raise HTTPException(status_code=422, detail="No reading position available")
+def _build_reader_position(
+    db: Session, user: User, book: Book, progress: UserBookProgress, micro_session: MicroSession
+) -> ReaderPositionOut:
     chapter = micro_session.chapter
 
     recap = None
@@ -151,6 +143,94 @@ def get_reader_position(
         checkpoint_due=CheckpointOut.model_validate(checkpoint) if checkpoint else None,
         progress_pct=progress_pct,
     )
+
+
+@router.get("/{book_id}/reader", response_model=ReaderPositionOut)
+def get_reader_position(
+    book_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
+    book = db.get(Book, book_id)
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    if not book.chapters:
+        raise HTTPException(status_code=422, detail="Book has no content")
+
+    progress = _get_or_create_progress(db, user, book)
+    micro_session = db.get(MicroSession, progress.current_micro_session_id)
+    if not micro_session:
+        raise HTTPException(status_code=422, detail="No reading position available")
+
+    return _build_reader_position(db, user, book, progress, micro_session)
+
+
+@router.post("/{book_id}/jump", response_model=ReaderPositionOut)
+def jump_to_micro_session(
+    book_id: int,
+    payload: JumpRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    book = db.get(Book, book_id)
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    micro_session = db.get(MicroSession, payload.micro_session_id)
+    if not micro_session or micro_session.chapter.book_id != book_id:
+        raise HTTPException(status_code=404, detail="Micro-session not found for this book")
+
+    progress = _get_or_create_progress(db, user, book)
+    progress.current_chapter_id = micro_session.chapter_id
+    progress.current_micro_session_id = micro_session.id
+    db.commit()
+    db.refresh(progress)
+
+    return _build_reader_position(db, user, book, progress, micro_session)
+
+
+@router.get("/{book_id}/micro-sessions", response_model=list[MicroSessionListItemOut])
+def list_micro_sessions(
+    book_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
+    book = db.get(Book, book_id)
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    progress = (
+        db.query(UserBookProgress)
+        .filter(UserBookProgress.user_id == user.id, UserBookProgress.book_id == book.id)
+        .first()
+    )
+    current_ms_id = progress.current_micro_session_id if progress else None
+
+    completed_ids = {
+        row.micro_session_id
+        for row in db.query(ReadingSession.micro_session_id)
+        .filter(
+            ReadingSession.user_id == user.id,
+            ReadingSession.book_id == book.id,
+            ReadingSession.completed.is_(True),
+        )
+        .distinct()
+    }
+
+    items = []
+    session_number = 0
+    for chapter in sorted(book.chapters, key=lambda c: c.index):
+        for ms in sorted(chapter.micro_sessions, key=lambda m: m.index):
+            session_number += 1
+            preview = " ".join(ms.text.split()[:4])
+            items.append(
+                MicroSessionListItemOut(
+                    id=ms.id,
+                    session_number=session_number,
+                    chapter_index=chapter.index,
+                    chapter_title=chapter.title,
+                    preview=preview,
+                    completed=ms.id in completed_ids,
+                    is_current=ms.id == current_ms_id,
+                )
+            )
+    return items
 
 
 @router.get("/{book_id}/progress", response_model=ProgressOut)
