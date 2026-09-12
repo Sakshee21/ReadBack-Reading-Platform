@@ -1,0 +1,589 @@
+:root {
+  --bg: #f7f3ea;
+  --surface: #ffffff;
+  --text: #2b2622;
+  --text-muted: #6b6258;
+  --accent: #a8562f;
+  --accent-hover: #8c4523;
+  --border: #e2d9c8;
+  --success: #3f7a4d;
+  --danger: #b3413a;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  --radius: 10px;
+  --serif: "Georgia", "Iowan Old Style", "Palatino Linotype", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1a17;
+    --surface: #262320;
+    --text: #ece6d9;
+    --text-muted: #a89e8d;
+    --accent: #d98354;
+    --accent-hover: #e69a6e;
+    --border: #3a352e;
+    --shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: var(--text-muted);
+}
+
+/* ---------- Auth ---------- */
+
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.auth-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 380px;
+}
+
+.auth-card h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.6rem;
+}
+
+.auth-card .subtitle {
+  color: var(--text-muted);
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.field label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+  color: var(--text-muted);
+}
+
+.field input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.field input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.error-text {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+}
+
+.auth-switch {
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ---------- Library ---------- */
+
+.library-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.library-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.library-header h1 {
+  margin: 0;
+  font-size: 1.7rem;
+}
+
+.streak-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.6rem 1rem;
+  box-shadow: var(--shadow);
+}
+
+.streak-badge .flame {
+  font-size: 1.4rem;
+}
+
+.streak-badge .streak-numbers {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.streak-badge .streak-current {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.streak-badge .streak-longest {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1.25rem;
+}
+
+.book-card {
+  display: block;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.12s ease;
+}
+
+.book-card:hover {
+  transform: translateY(-2px);
+}
+
+.book-card h3 {
+  margin: 0 0 0.25rem;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+}
+
+.book-card .author {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0 0 0.9rem;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar .fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.progress-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+}
+
+/* ---------- Reader ---------- */
+
+.reader-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.reader-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.reader-topbar .book-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.reader-topbar .chapter-label {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.reader-topbar .controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-btn {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.icon-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.reader-progress-track {
+  height: 3px;
+  background: var(--border);
+}
+
+.reader-progress-track .fill {
+  height: 100%;
+  background: var(--accent);
+}
+
+.reader-body {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 2.5rem 1.5rem 6rem;
+}
+
+.reader-content {
+  max-width: 620px;
+  width: 100%;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  line-height: 1.85;
+}
+
+.reader-content p {
+  margin: 0 0 1.2rem;
+  white-space: pre-wrap;
+}
+
+.reader-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.reader-footer .btn-primary {
+  max-width: 320px;
+}
+
+/* ---------- Recap banner ---------- */
+
+.recap-banner {
+  max-width: 620px;
+  margin: 0 auto 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  font-family: var(--sans);
+}
+
+.recap-banner .recap-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.recap-banner p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* ---------- Visualization prompt ---------- */
+
+.viz-prompt {
+  max-width: 620px;
+  margin: 1.5rem auto;
+  text-align: center;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+.viz-prompt p {
+  font-family: var(--sans);
+  color: var(--text-muted);
+  margin: 0 0 1rem;
+  font-style: italic;
+}
+
+.viz-artwork {
+  margin-top: 1rem;
+  height: 160px;
+  border-radius: 8px;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--border),
+    var(--border) 10px,
+    var(--bg) 10px,
+    var(--bg) 20px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ---------- Autoplay countdown ---------- */
+
+.countdown-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.countdown-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  text-align: center;
+  width: min(90vw, 340px);
+  box-shadow: var(--shadow);
+}
+
+.countdown-card .countdown-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.countdown-card p {
+  color: var(--text-muted);
+  margin: 0 0 1.25rem;
+}
+
+.countdown-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+/* ---------- RSVP mode ---------- */
+
+.rsvp-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+}
+
+.rsvp-word {
+  font-family: var(--serif);
+  font-size: 3rem;
+  font-weight: 600;
+  min-height: 4rem;
+}
+
+.rsvp-controls {
+  margin-top: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.rsvp-controls label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.rsvp-progress {
+  margin-top: 1rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ---------- Checkpoint quiz ---------- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 25;
+  padding: 1.5rem;
+}
+
+.checkpoint-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 2rem;
+  max-width: 520px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+
+.checkpoint-card h2 {
+  margin: 0 0 0.4rem;
+}
+
+.checkpoint-card .subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0 0 1.5rem;
+}
+
+.quiz-question {
+  margin-bottom: 1.5rem;
+}
+
+.quiz-question .prompt {
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.quiz-option.selected {
+  border-color: var(--accent);
+  background: rgba(168, 86, 47, 0.08);
+}
+
+.checkpoint-result {
+  text-align: center;
+}
+
+.checkpoint-result .score {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0.5rem 0;
+}
