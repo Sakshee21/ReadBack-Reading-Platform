@@ -472,44 +472,43 @@ button {
   justify-content: center;
 }
 
-/* ---------- RSVP mode ---------- */
+/* ---------- RSVP mode (inline word highlighting) ---------- */
 
-.rsvp-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 15;
-}
-
-.rsvp-word {
-  font-family: var(--serif);
-  font-size: 3rem;
-  font-weight: 600;
-  min-height: 4rem;
-}
-
-.rsvp-controls {
-  margin-top: 2.5rem;
+.rsvp-control-bar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  margin: 0 0 1.5rem;
+  font-family: var(--sans);
 }
 
-.rsvp-controls label {
-  font-size: 0.85rem;
+.rsvp-control-bar label {
+  font-size: 0.8rem;
   color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-.rsvp-progress {
-  margin-top: 1rem;
+.rsvp-word-count {
+  font-size: 0.8rem;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+.rsvp-current {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
 /* ---------- Checkpoint quiz ---------- */

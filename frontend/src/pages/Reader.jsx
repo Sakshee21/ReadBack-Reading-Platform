@@ -96,10 +96,6 @@ export default function Reader() {
     return <CheckpointQuiz checkpoint={position.checkpoint_due} onDone={handleCheckpointDone} />;
   }
 
-  if (rsvpActive) {
-    return <RSVPMode text={position.micro_session.text} onExit={() => setRsvpActive(false)} />;
-  }
-
   return (
     <div className="reader-page">
       <div className="reader-topbar">
@@ -109,7 +105,10 @@ export default function Reader() {
         </div>
         <div className="controls">
           <StreakDisplay streak={streak} />
-          <button className="icon-btn" onClick={() => setRsvpActive(true)}>
+          <button
+            className={`icon-btn ${rsvpActive ? "active" : ""}`}
+            onClick={() => setRsvpActive((a) => !a)}
+          >
             RSVP mode
           </button>
           <Link to="/library" className="icon-btn">
@@ -124,9 +123,15 @@ export default function Reader() {
       <div className="reader-body">
         <div className="reader-content">
           <RecapBanner recap={position.recap} />
-          {position.micro_session.text.split(/\n{2,}/).map((paragraph, i) => (
-            <p key={i}>{paragraph}</p>
-          ))}
+          {rsvpActive ? (
+            <RSVPMode
+              key={position.micro_session.id}
+              text={position.micro_session.text}
+              onExit={() => setRsvpActive(false)}
+            />
+          ) : (
+            position.micro_session.text.split(/\n{2,}/).map((paragraph, i) => <p key={i}>{paragraph}</p>)
+          )}
           {position.micro_session.has_visualization_prompt && <VisualizationPrompt />}
         </div>
       </div>
