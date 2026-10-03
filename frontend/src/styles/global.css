@@ -689,3 +689,96 @@ button {
 .drawer-item.current .drawer-item-label {
   color: var(--accent);
 }
+
+/* ---------- Recap dismiss ---------- */
+
+.recap-banner .recap-dismiss {
+  margin-top: 0.75rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.recap-banner .recap-dismiss:hover {
+  color: var(--accent);
+}
+
+/* ---------- Unstuck focus-burst prompt ---------- */
+
+.unstuck-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  z-index: 22;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: min(92vw, 520px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 0.85rem 1.1rem;
+  box-shadow: var(--shadow);
+  font-family: var(--sans);
+  animation: drawer-slide-in 0.18s ease-out;
+}
+
+.unstuck-text {
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.unstuck-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.burst-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 24;
+  padding: 1.5rem;
+}
+
+.burst-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  width: min(92vw, 640px);
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  font-family: var(--serif);
+}
+
+.burst-card .burst-label {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.burst-card .burst-hint {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 1rem 0 0;
+}

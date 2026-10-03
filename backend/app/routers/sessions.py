@@ -22,6 +22,7 @@ from app.schemas import (
     SessionStart,
     StreakOut,
 )
+from app.services.progression import build_block, ordered_micro_sessions, size_level_for
 from app.services.streak import apply_completed_session
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
@@ -48,22 +49,12 @@ def start_session(
     return session
 
 
-def _find_next_micro_session(db: Session, current: MicroSession) -> MicroSession | None:
-    chapter = current.chapter
-    siblings = sorted(chapter.micro_sessions, key=lambda m: m.index)
-    pos = next((i for i, m in enumerate(siblings) if m.id == current.id), None)
-    if pos is not None and pos + 1 < len(siblings):
-        return siblings[pos + 1]
-
-    book = db.get(Book, chapter.book_id)
-    chapters = sorted(book.chapters, key=lambda c: c.index)
-    cpos = next((i for i, c in enumerate(chapters) if c.id == chapter.id), None)
-    if cpos is None:
-        return None
-    for next_chapter in chapters[cpos + 1 :]:
-        if next_chapter.micro_sessions:
-            return sorted(next_chapter.micro_sessions, key=lambda m: m.index)[0]
-    return None
+def _completed_count(db: Session, user: User) -> int:
+    return (
+        db.query(ReadingSession)
+        .filter(ReadingSession.user_id == user.id, ReadingSession.completed.is_(True))
+        .count()
+    )
 
 
 @router.post("/complete", response_model=NextSessionOut)
@@ -78,10 +69,23 @@ def complete_session(
 
     current_micro = db.get(MicroSession, session.micro_session_id)
 
+    # The block just read spans as many micro-sessions as the user's size level
+    # allowed when it was served, so advance past the whole block and credit
+    # every word in it. completed_before excludes this not-yet-completed row.
+    completed_before = _completed_count(db, user)
+    block, next_micro = ([], None)
+    if current_micro:
+        book = db.get(Book, session.book_id)
+        block, next_micro = build_block(
+            ordered_micro_sessions(book), current_micro.id, size_level_for(completed_before)
+        )
+
     now = dt.datetime.utcnow()
     session.ended_at = now
     session.completed = True
-    session.words_read = current_micro.word_count if current_micro else 0
+    session.words_read = sum(ms.word_count for ms in block) if block else (
+        current_micro.word_count if current_micro else 0
+    )
 
     today = now.date()
     if user.last_read_date != today:
@@ -98,11 +102,15 @@ def complete_session(
         .first()
     )
 
-    next_micro = _find_next_micro_session(db, current_micro) if current_micro else None
     if progress:
         progress.current_chapter_id = next_micro.chapter_id if next_micro else progress.current_chapter_id
         progress.current_micro_session_id = next_micro.id if next_micro else None
         progress.last_read_at = now
+
+    # Recompute the size level now that this session counts as completed.
+    new_level = size_level_for(completed_before + 1)
+    session_size_changed = new_level != user.session_size_level
+    user.session_size_level = new_level
 
     db.commit()
 
@@ -128,4 +136,6 @@ def complete_session(
             longest_streak=user.longest_streak,
             last_read_date=user.last_read_date,
         ),
+        session_size_level=new_level,
+        session_size_changed=session_size_changed,
     )

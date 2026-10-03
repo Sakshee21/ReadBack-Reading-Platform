@@ -12,3 +12,5 @@ frontend/dist/
 frontend/.env
 
 .DS_Store
+
+CLAUDE.md

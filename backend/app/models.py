@@ -26,6 +26,9 @@ class User(Base):
     current_streak: Mapped[int] = mapped_column(Integer, default=0)
     longest_streak: Mapped[int] = mapped_column(Integer, default=0)
     last_read_date: Mapped[dt.date | None] = mapped_column(Date, nullable=True)
+    # Progressive session length: 1 = single micro-session, 2/3 = that many
+    # merged at read time once the user has completed enough sessions.
+    session_size_level: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 
     progress: Mapped[list["UserBookProgress"]] = relationship(back_populates="user")
     sessions: Mapped[list["ReadingSession"]] = relationship(back_populates="user")
@@ -132,3 +135,25 @@ class CheckpointAttempt(Base):
     checkpoint_id: Mapped[int] = mapped_column(ForeignKey("comprehension_checkpoints.id"), nullable=False)
     score: Mapped[float] = mapped_column(Integer, default=0)
     answered_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow)
+
+
+class ReadingEvent(Base):
+    """Instrumentation log for the pilot. One row per user-facing interaction
+    (session start/end, autoplay, recap, RSVP, visualization, quiz, streak).
+    book/chapter/micro-session are nullable so events without a full reading
+    context (e.g. a quiz answered between chapters) still log cleanly.
+
+    The free-form payload column is named ``event_metadata`` because SQLAlchemy
+    reserves the ``metadata`` attribute on declarative models.
+    """
+
+    __tablename__ = "reading_events"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True, nullable=False)
+    book_id: Mapped[int | None] = mapped_column(ForeignKey("books.id"), nullable=True)
+    chapter_id: Mapped[int | None] = mapped_column(ForeignKey("chapters.id"), nullable=True)
+    micro_session_id: Mapped[int | None] = mapped_column(ForeignKey("micro_sessions.id"), nullable=True)
+    event_type: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+    event_metadata: Mapped[dict | None] = mapped_column("event_metadata", JSON, nullable=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow, index=True)

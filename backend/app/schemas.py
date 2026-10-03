@@ -82,6 +82,7 @@ class ChapterOut(BaseModel):
 class ReaderPositionOut(BaseModel):
     book: BookOut
     micro_session: MicroSessionOut
+    chapter_id: int
     chapter_index: int
     chapter_title: str
     is_first_in_book: bool
@@ -118,6 +119,8 @@ class NextSessionOut(BaseModel):
     next_micro_session: MicroSessionOut | None
     checkpoint_due: "CheckpointOut | None"
     streak: "StreakOut"
+    session_size_level: int
+    session_size_changed: bool
 
 
 class CheckpointOut(BaseModel):
@@ -153,6 +156,14 @@ class ProgressOut(BaseModel):
     words_read: int
     total_words: int
     progress_pct: float
+
+
+class EventIn(BaseModel):
+    event_type: str
+    book_id: int | None = None
+    chapter_id: int | None = None
+    micro_session_id: int | None = None
+    metadata: dict | None = None
 
 
 ReaderPositionOut.model_rebuild()

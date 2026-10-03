@@ -1,10 +1,25 @@
 import { useEffect, useRef, useState } from "react";
+import { logEvent } from "../api";
 
-export default function AutoplayCountdown({ seconds = 3, onComplete, onCancel }) {
+export default function AutoplayCountdown({
+  seconds = 3,
+  onComplete,
+  onCancel,
+  bookId = null,
+  chapterId = null,
+  microSessionId = null,
+}) {
   const [remaining, setRemaining] = useState(seconds);
   const [paused, setPaused] = useState(false);
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
+
+  function togglePause() {
+    setPaused((p) => {
+      if (!p) logEvent("autoplay_pause", { bookId, chapterId, microSessionId });
+      return !p;
+    });
+  }
 
   useEffect(() => {
     if (paused) return;
@@ -22,7 +37,7 @@ export default function AutoplayCountdown({ seconds = 3, onComplete, onCancel })
         <div className="countdown-number">{remaining}</div>
         <p>Next micro-session starting{paused ? " (paused)" : "..."}</p>
         <div className="countdown-actions">
-          <button className="btn-secondary" onClick={() => setPaused((p) => !p)}>
+          <button className="btn-secondary" onClick={togglePause}>
             {paused ? "Resume" : "Pause"}
           </button>
           <button className="btn-secondary" onClick={onCancel}>

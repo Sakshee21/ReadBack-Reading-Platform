@@ -26,6 +26,7 @@ from app.schemas import (
     ProgressOut,
     ReaderPositionOut,
 )
+from app.services.progression import build_block, ordered_micro_sessions, size_level_for
 from app.services.recap import build_recap, needs_recap
 
 router = APIRouter(prefix="/books", tags=["books"])
@@ -113,10 +114,37 @@ def _checkpoint_due(db: Session, user: User, book: Book, chapter: Chapter, micro
     return checkpoint
 
 
+def _completed_session_count(db: Session, user: User) -> int:
+    return (
+        db.query(ReadingSession)
+        .filter(ReadingSession.user_id == user.id, ReadingSession.completed.is_(True))
+        .count()
+    )
+
+
 def _build_reader_position(
     db: Session, user: User, book: Book, progress: UserBookProgress, micro_session: MicroSession
 ) -> ReaderPositionOut:
     chapter = micro_session.chapter
+
+    # Merge the current micro-session with the next few into one served block,
+    # sized by how many sessions the reader has completed (progressive length).
+    size = size_level_for(_completed_session_count(db, user))
+    if user.session_size_level != size:
+        user.session_size_level = size
+        db.commit()
+    block, _ = build_block(ordered_micro_sessions(book), micro_session.id, size)
+    if not block:
+        block = [micro_session]
+
+    merged = MicroSessionOut(
+        id=block[0].id,
+        index=block[0].index,
+        text="\n\n".join(ms.text for ms in block),
+        word_count=sum(ms.word_count for ms in block),
+        is_cliffhanger_break=block[-1].is_cliffhanger_break,
+        has_visualization_prompt=any(ms.has_visualization_prompt for ms in block),
+    )
 
     recap = None
     if needs_recap(progress.last_read_at, dt.datetime.utcnow(), settings.recap_gap_hours):
@@ -135,7 +163,8 @@ def _build_reader_position(
 
     return ReaderPositionOut(
         book=_book_out(book),
-        micro_session=MicroSessionOut.model_validate(micro_session),
+        micro_session=merged,
+        chapter_id=chapter.id,
         chapter_index=chapter.index,
         chapter_title=chapter.title,
         is_first_in_book=(chapter.index == 0 and micro_session.index == 0),
@@ -213,23 +242,29 @@ def list_micro_sessions(
         .distinct()
     }
 
+    # With merged blocks only the block's first micro-session gets its own
+    # ReadingSession row, so also treat everything before the current position
+    # as completed to keep the drawer accurate.
+    ordered = ordered_micro_sessions(book)
+    order_of = {ms.id: i for i, ms in enumerate(ordered)}
+    current_order = order_of.get(current_ms_id)
+
     items = []
-    session_number = 0
-    for chapter in sorted(book.chapters, key=lambda c: c.index):
-        for ms in sorted(chapter.micro_sessions, key=lambda m: m.index):
-            session_number += 1
-            preview = " ".join(ms.text.split()[:4])
-            items.append(
-                MicroSessionListItemOut(
-                    id=ms.id,
-                    session_number=session_number,
-                    chapter_index=chapter.index,
-                    chapter_title=chapter.title,
-                    preview=preview,
-                    completed=ms.id in completed_ids,
-                    is_current=ms.id == current_ms_id,
-                )
+    for session_number, ms in enumerate(ordered, start=1):
+        completed = ms.id in completed_ids or (
+            current_order is not None and order_of[ms.id] < current_order
+        )
+        items.append(
+            MicroSessionListItemOut(
+                id=ms.id,
+                session_number=session_number,
+                chapter_index=ms.chapter.index,
+                chapter_title=ms.chapter.title,
+                preview=" ".join(ms.text.split()[:4]),
+                completed=completed,
+                is_current=ms.id == current_ms_id,
             )
+        )
     return items
 
 

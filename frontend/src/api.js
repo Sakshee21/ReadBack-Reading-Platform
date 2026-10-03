@@ -72,4 +72,24 @@ export const api = {
   getStreak: () => request("/streaks/me"),
 };
 
+/**
+ * Fire-and-forget instrumentation for the pilot. Known id fields are pulled
+ * out into their own columns; everything else becomes the event's metadata.
+ * Never throws - a failed log must not interrupt reading - but it warns rather
+ * than failing silently, since missing pilot data is a real problem.
+ */
+export function logEvent(eventType, fields = {}) {
+  const { bookId = null, chapterId = null, microSessionId = null, ...metadata } = fields;
+  const body = {
+    event_type: eventType,
+    book_id: bookId,
+    chapter_id: chapterId,
+    micro_session_id: microSessionId,
+    metadata: Object.keys(metadata).length ? metadata : null,
+  };
+  request("/events", { method: "POST", body }).catch((err) =>
+    console.warn(`logEvent(${eventType}) failed:`, err.message)
+  );
+}
+
 export { ApiError };

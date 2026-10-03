@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     jwt_secret: str = "dev-secret-change-me"
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24 * 7
+    admin_token: str = "readback-admin-dev"
     recap_gap_hours: int = 24
     checkpoint_interval: int = 10
     micro_session_min_words: int = 400

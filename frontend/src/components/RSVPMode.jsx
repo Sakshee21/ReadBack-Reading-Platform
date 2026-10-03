@@ -1,11 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { logEvent } from "../api";
 
 /**
  * Renders the same paragraphs as the normal reader view, but with the
  * current word highlighted and auto-advancing at the chosen WPM - the page
  * itself never changes, only which word is lit up moves.
  */
-export default function RSVPMode({ text, onExit }) {
+export default function RSVPMode({
+  text,
+  onExit,
+  onComplete,
+  mode = "manual",
+  bookId = null,
+  chapterId = null,
+  microSessionId = null,
+}) {
   const paragraphs = useMemo(() => text.split(/\n{2,}/), [text]);
 
   const structuredParagraphs = useMemo(() => {
@@ -28,12 +37,41 @@ export default function RSVPMode({ text, onExit }) {
   const [wpm, setWpm] = useState(300);
   const contentRef = useRef(null);
 
+  // rsvp_start on mount, rsvp_exit on unmount with final WPM + duration. The
+  // wpm ref lets the unmount cleanup read the latest value without re-binding.
+  const wpmRef = useRef(wpm);
+  wpmRef.current = wpm;
+  useEffect(() => {
+    const startedAt = Date.now();
+    logEvent("rsvp_start", { bookId, chapterId, microSessionId, mode });
+    return () => {
+      logEvent("rsvp_exit", {
+        bookId,
+        chapterId,
+        microSessionId,
+        mode,
+        wpm: wpmRef.current,
+        duration_ms: Date.now() - startedAt,
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (!playing || index >= totalWords) return;
     const delay = 60000 / wpm;
     const timer = setTimeout(() => setIndex((i) => i + 1), delay);
     return () => clearTimeout(timer);
   }, [playing, index, wpm, totalWords]);
+
+  // Notify the parent once the burst has streamed its last word.
+  const completedRef = useRef(false);
+  useEffect(() => {
+    if (index >= totalWords && totalWords > 0 && !completedRef.current) {
+      completedRef.current = true;
+      onComplete?.();
+    }
+  }, [index, totalWords, onComplete]);
 
   useEffect(() => {
     const current = contentRef.current?.querySelector(".rsvp-current");

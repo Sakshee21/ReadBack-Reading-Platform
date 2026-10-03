@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { api } from "../api";
+import { useEffect, useState } from "react";
+import { api, logEvent } from "../api";
 
 export default function CheckpointQuiz({ checkpoint, onDone }) {
   const [answers, setAnswers] = useState({});
@@ -9,11 +9,27 @@ export default function CheckpointQuiz({ checkpoint, onDone }) {
   const questions = checkpoint.questions;
   const allAnswered = questions.every((q) => answers[q.id]);
 
+  useEffect(() => {
+    logEvent("quiz_started", {
+      bookId: checkpoint.book_id,
+      chapter_index_trigger: checkpoint.chapter_index_trigger,
+      checkpoint_id: checkpoint.id,
+    });
+  }, [checkpoint.id, checkpoint.book_id, checkpoint.chapter_index_trigger]);
+
   async function handleSubmit() {
     setSubmitting(true);
     try {
       const res = await api.submitCheckpoint(checkpoint.id, answers);
       setResult(res);
+      logEvent("quiz_submitted", {
+        bookId: checkpoint.book_id,
+        chapter_index_trigger: checkpoint.chapter_index_trigger,
+        checkpoint_id: checkpoint.id,
+        score: res.score,
+        correct: res.correct,
+        total: res.total,
+      });
     } finally {
       setSubmitting(false);
     }
