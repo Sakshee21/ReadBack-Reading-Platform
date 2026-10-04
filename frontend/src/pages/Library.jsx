@@ -3,22 +3,29 @@ import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../AuthContext";
 import StreakDisplay from "../components/StreakDisplay";
+import NudgeBanner from "../components/NudgeBanner";
 
 export default function Library() {
   const { logout } = useAuth();
   const [books, setBooks] = useState([]);
   const [progressByBook, setProgressByBook] = useState({});
   const [streak, setStreak] = useState(null);
+  const [nudge, setNudge] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      const [bookList, streakData] = await Promise.all([api.listBooks(), api.getStreak()]);
+      const [bookList, streakData, nudgeData] = await Promise.all([
+        api.listBooks(),
+        api.getStreak(),
+        api.getNudge().catch(() => null),
+      ]);
       if (cancelled) return;
       setBooks(bookList);
       setStreak(streakData);
+      setNudge(nudgeData);
 
       const progressEntries = await Promise.all(
         bookList.map((book) => api.getProgress(book.id).then((p) => [book.id, p]))
@@ -47,6 +54,8 @@ export default function Library() {
           </button>
         </div>
       </div>
+
+      <NudgeBanner nudge={nudge} onDismiss={() => setNudge(null)} />
 
       <div className="book-grid">
         {books.map((book) => {

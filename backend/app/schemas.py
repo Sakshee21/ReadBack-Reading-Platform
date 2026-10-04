@@ -163,6 +163,14 @@ class ProgressOut(BaseModel):
     progress_pct: float
 
 
+class NudgeOut(BaseModel):
+    kind: str | None
+    message: str | None
+    book_id: int | None
+    book_title: str | None
+    days_away: int
+
+
 class PaceOut(BaseModel):
     wpm_recent: float | None
     wpm_average: float | None

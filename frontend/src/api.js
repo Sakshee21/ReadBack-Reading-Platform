@@ -71,6 +71,7 @@ export const api = {
 
   getStreak: () => request("/streaks/me"),
   getPace: (bookId) => request(`/pace/me${bookId ? `?book_id=${bookId}` : ""}`),
+  getNudge: () => request("/nudge/me"),
 };
 
 /**

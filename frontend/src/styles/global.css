@@ -749,6 +749,38 @@ button {
   color: var(--accent);
 }
 
+/* ---------- Reminder nudge ---------- */
+
+.nudge-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.15rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+  font-family: var(--sans);
+}
+
+.nudge-banner.streak_at_risk {
+  border-left-color: var(--success);
+}
+
+.nudge-message {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.nudge-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 /* ---------- Reading pace ---------- */
 
 .pace-badge {
