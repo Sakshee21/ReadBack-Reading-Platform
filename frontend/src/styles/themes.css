@@ -1,0 +1,125 @@
+/* Mood themes - DECORATIVE ONLY.
+ *
+ * A theme may tint the page background and surfaces. It must never depict
+ * anything from the story: no scenes, characters, objects or illustrative
+ * texture. The whole point of ReadBack is that the reader builds the picture,
+ * so the UI deliberately stays abstract.
+ *
+ * Every theme is identical for every pilot user (it comes from books.theme in
+ * the database), and backend/tests/test_themes.py parses THIS FILE to check
+ * that --text on --bg and --text on --surface stay at WCAG AA (>= 4.5:1) in
+ * both light and dark. If you add a theme here, that test covers it
+ * automatically - run it before shipping.
+ *
+ * "plain" is the opt-out: it sets nothing, so the base palette applies.
+ */
+
+[data-theme="parchment"] {
+  --bg: #f7f3ea;
+  --surface: #fffdf8;
+  --text: #2b2622;
+  --text-muted: #6b6258;
+  --accent: #a8562f;
+  --border: #e2d9c8;
+}
+
+[data-theme="meadow"] {
+  --bg: #eef4ea;
+  --surface: #fbfdfa;
+  --text: #22291f;
+  --text-muted: #58614f;
+  --accent: #3f7a4d;
+  --border: #d4e0cd;
+}
+
+[data-theme="moonlit"] {
+  --bg: #eceff5;
+  --surface: #fafbfd;
+  --text: #1f242e;
+  --text-muted: #525a68;
+  --accent: #3f5f8a;
+  --border: #d2d8e3;
+}
+
+[data-theme="sunlit"] {
+  --bg: #fbf3e2;
+  --surface: #fffdf7;
+  --text: #2e2719;
+  --text-muted: #6a5f47;
+  --accent: #9a6716;
+  --border: #ead9b8;
+}
+
+[data-theme="rose"] {
+  --bg: #f8eef0;
+  --surface: #fffafb;
+  --text: #2d2126;
+  --text-muted: #6a555d;
+  --accent: #9c3f5c;
+  --border: #e8d2d8;
+}
+
+[data-theme="faded"] {
+  --bg: #f4f1e4;
+  --surface: #fdfcf6;
+  --text: #2a2822;
+  --text-muted: #635f52;
+  --accent: #8a7520;
+  --border: #ded8c2;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="parchment"] {
+    --bg: #1c1a17;
+    --surface: #262320;
+    --text: #ece6d9;
+    --text-muted: #a89e8d;
+    --accent: #d98354;
+    --border: #3a352e;
+  }
+
+  [data-theme="meadow"] {
+    --bg: #161b15;
+    --surface: #1f261e;
+    --text: #e2ead9;
+    --text-muted: #9aa691;
+    --accent: #7fba86;
+    --border: #2e3a2d;
+  }
+
+  [data-theme="moonlit"] {
+    --bg: #14171d;
+    --surface: #1d2129;
+    --text: #dfe4ee;
+    --text-muted: #949db0;
+    --accent: #83a9dc;
+    --border: #2c323d;
+  }
+
+  [data-theme="sunlit"] {
+    --bg: #1e1a12;
+    --surface: #28231a;
+    --text: #efe6d3;
+    --text-muted: #ab9f86;
+    --accent: #d9a74f;
+    --border: #3b3426;
+  }
+
+  [data-theme="rose"] {
+    --bg: #1d161a;
+    --surface: #271e23;
+    --text: #efe0e5;
+    --text-muted: #ad96a0;
+    --accent: #dd8ca6;
+    --border: #3a2c33;
+  }
+
+  [data-theme="faded"] {
+    --bg: #1b1a14;
+    --surface: #24231b;
+    --text: #e9e5d4;
+    --text-muted: #a49f8c;
+    --accent: #c9b45c;
+    --border: #35332a;
+  }
+}

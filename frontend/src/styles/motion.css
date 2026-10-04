@@ -1,0 +1,137 @@
+/* Subtle UI motion.
+ *
+ * Rules this file sticks to:
+ *   - Nothing animates story content. Motion is feedback and navigation only.
+ *   - Text is readable the instant it mounts: the fade starts near-opaque and
+ *     finishes in well under 300ms, so nothing is ever gated behind an
+ *     animation.
+ *   - Everything is switched off by `data-reduce-motion`, which
+ *     SettingsContext sets from the OS preference and the in-app toggle.
+ */
+
+:root {
+  --motion-fast: 160ms;
+  --motion-base: 240ms;
+  --motion-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ---------- new text / new session ---------- */
+
+.fade-in-text > p {
+  animation: fade-rise var(--motion-base) var(--motion-ease) both;
+}
+
+@keyframes fade-rise {
+  from {
+    /* starts mostly visible on purpose - readable immediately */
+    opacity: 0.35;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.chapter-label,
+.book-title {
+  transition: opacity var(--motion-base) var(--motion-ease);
+}
+
+/* ---------- progress ---------- */
+
+.reader-progress-track .fill {
+  transition: width var(--motion-base) var(--motion-ease);
+}
+
+.progress-bar .fill {
+  transition: width var(--motion-base) var(--motion-ease);
+}
+
+.progress-ring circle.progress-ring-value {
+  transition: stroke-dashoffset var(--motion-base) var(--motion-ease);
+}
+
+/* ---------- streak increment ---------- */
+
+.streak-badge.bump .flame {
+  animation: streak-pop 600ms var(--motion-ease);
+  display: inline-block;
+}
+
+@keyframes streak-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.45) rotate(-8deg); }
+  60% { transform: scale(0.95) rotate(4deg); }
+  100% { transform: scale(1); }
+}
+
+.streak-badge.bump .streak-current {
+  animation: streak-glow 600ms var(--motion-ease);
+}
+
+@keyframes streak-glow {
+  0%, 100% { color: inherit; }
+  40% { color: var(--accent); }
+}
+
+/* ---------- celebration ---------- */
+
+.celebration-badge {
+  animation: celebrate-in 1600ms var(--motion-ease) both;
+}
+
+@keyframes celebrate-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.9); }
+  12% { opacity: 1; transform: translateY(0) scale(1); }
+  80% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-6px) scale(0.98); }
+}
+
+.celebration-check path {
+  stroke-dasharray: 32;
+  stroke-dashoffset: 32;
+  animation: draw-check 420ms var(--motion-ease) 80ms forwards;
+}
+
+@keyframes draw-check {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ---------- banners / toasts ---------- */
+
+.nudge-banner,
+.recap-banner {
+  animation: fade-rise var(--motion-base) var(--motion-ease) both;
+}
+
+/* ---------- the off switch ----------
+ * An explicit data-reduce-motion="false" means the user asked for motion, so
+ * it wins over the OS hint; anything else honours the OS.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-reduce-motion="false"]) *,
+  :root:not([data-reduce-motion="false"]) *::before,
+  :root:not([data-reduce-motion="false"]) *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* The celebration fades rather than animating when motion is reduced, so the
+ * check mark is still drawn (just not stroked in). */
+[data-reduce-motion="true"] .celebration-check path {
+  stroke-dashoffset: 0;
+}

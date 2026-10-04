@@ -4,9 +4,11 @@ import { api } from "../api";
 import { useAuth } from "../AuthContext";
 import StreakDisplay from "../components/StreakDisplay";
 import NudgeBanner from "../components/NudgeBanner";
+import SettingsPanel from "../components/SettingsPanel";
 
 export default function Library() {
   const { logout } = useAuth();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [books, setBooks] = useState([]);
   const [progressByBook, setProgressByBook] = useState({});
   const [streak, setStreak] = useState(null);
@@ -49,6 +51,9 @@ export default function Library() {
         <h1>Your library</h1>
         <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
           <StreakDisplay streak={streak} />
+          <button className="btn-secondary" onClick={() => setSettingsOpen(true)}>
+            Settings
+          </button>
           <button className="btn-secondary" onClick={logout}>
             Log out
           </button>
@@ -75,6 +80,8 @@ export default function Library() {
           );
         })}
       </div>
+
+      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }

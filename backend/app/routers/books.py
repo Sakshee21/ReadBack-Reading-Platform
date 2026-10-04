@@ -41,6 +41,7 @@ def _book_out(book: Book) -> BookOut:
         author=book.author,
         total_word_count=book.total_word_count,
         chapter_count=len(book.chapters),
+        theme=book.theme or "parchment",
     )
 
 

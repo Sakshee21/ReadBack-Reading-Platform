@@ -9,6 +9,10 @@ import CheckpointQuiz from "../components/CheckpointQuiz";
 import StreakDisplay from "../components/StreakDisplay";
 import PaceDisplay from "../components/PaceDisplay";
 import SessionDrawer from "../components/SessionDrawer";
+import ProgressRing from "../components/ProgressRing";
+import SettingsPanel from "../components/SettingsPanel";
+import CelebrationOverlay, { celebrationFor } from "../components/CelebrationOverlay";
+import { useSettings } from "../SettingsContext";
 
 export default function Reader() {
   const { bookId } = useParams();
@@ -26,6 +30,11 @@ export default function Reader() {
   const [recapHidden, setRecapHidden] = useState(false);
   const [unstuckPrompt, setUnstuckPrompt] = useState(false);
   const [burstParagraph, setBurstParagraph] = useState(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [celebration, setCelebration] = useState(null);
+  const [streakBump, setStreakBump] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const { plainTheme } = useSettings();
   const startedForMicroSession = useRef(null);
   const contentAreaRef = useRef(null);
   // Micro-session id the unstuck prompt has already been resolved for, so we
@@ -199,7 +208,41 @@ export default function Reader() {
   // Always start a newly-shown micro-session scrolled to the top.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
+    setScrollProgress(0);
   }, [position?.micro_session?.id]);
+
+  // Decorative mood tint for this book, applied to the document so the whole
+  // page (not just a panel) picks it up. "Plain theme" opts out entirely.
+  const bookTheme = position?.book?.theme;
+  useEffect(() => {
+    if (!bookTheme || plainTheme) {
+      delete document.documentElement.dataset.theme;
+      return;
+    }
+    document.documentElement.dataset.theme = bookTheme;
+    return () => {
+      delete document.documentElement.dataset.theme;
+    };
+  }, [bookTheme, plainTheme]);
+
+  // How far through the current session the reader has scrolled - drives the
+  // progress ring. Passive listener so it never janks scrolling.
+  useEffect(() => {
+    function onScroll() {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(scrollable > 0 ? Math.min(1, window.scrollY / scrollable) : 1);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [position?.micro_session?.id]);
+
+  // Brief pop when the streak goes up.
+  useEffect(() => {
+    if (!streakBump) return;
+    const timer = setTimeout(() => setStreakBump(false), 700);
+    return () => clearTimeout(timer);
+  }, [streakBump]);
 
   const advanceToNextPosition = useCallback(() => {
     api
@@ -258,6 +301,14 @@ export default function Reader() {
       if (result.session_size_changed) {
         logEvent("session_size", { bookId: ctx.bookId, level: result.session_size_level });
       }
+
+      // Reward animation. The rule is deterministic (see CelebrationOverlay):
+      // a milestone burst only when this completion lands the streak exactly
+      // on 3, 7 or 14 days, otherwise the standard one.
+      const streakBefore = streak?.current_streak ?? 0;
+      const streakAfter = result.streak.current_streak;
+      setCelebration(celebrationFor({ streakBefore, streakAfter }));
+      if (streakAfter > streakBefore) setStreakBump(true);
 
       const prev = prevStreak.current;
       if (!prev || prev.current_streak !== result.streak.current_streak ||
@@ -339,7 +390,8 @@ export default function Reader() {
           <div className="chapter-label">{position.chapter_title || `Chapter ${position.chapter_index + 1}`}</div>
         </div>
         <div className="controls">
-          <StreakDisplay streak={streak} />
+          <ProgressRing value={scrollProgress} />
+          <StreakDisplay streak={streak} bump={streakBump} />
           <PaceDisplay pace={pace} />
           <button
             className={`icon-btn ${rsvpActive ? "active" : ""}`}
@@ -349,6 +401,9 @@ export default function Reader() {
           </button>
           <button className="icon-btn" onClick={() => setDrawerOpen(true)}>
             Sessions
+          </button>
+          <button className="icon-btn" onClick={() => setSettingsOpen(true)}>
+            Settings
           </button>
           <Link to="/library" className="icon-btn">
             Library
@@ -377,7 +432,11 @@ export default function Reader() {
               onExit={() => setRsvpActive(false)}
             />
           ) : (
-            position.micro_session.text.split(/\n{2,}/).map((paragraph, i) => <p key={i}>{paragraph}</p>)
+            <div className="fade-in-text" key={position.micro_session.id}>
+              {position.micro_session.text
+                .split(/\n{2,}/)
+                .map((paragraph, i) => <p key={i}>{paragraph}</p>)}
+            </div>
           )}
           {position.micro_session.has_visualization_prompt && (
             <VisualizationPrompt
@@ -459,11 +518,23 @@ export default function Reader() {
         />
       )}
 
+      <CelebrationOverlay
+        celebration={celebration}
+        {...logCtx}
+        onDone={() => setCelebration(null)}
+      />
+
       <SessionDrawer
         open={drawerOpen}
         items={sessionList}
         onClose={() => setDrawerOpen(false)}
         onSelect={handleDrawerSelect}
+      />
+
+      <SettingsPanel
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        bookId={position.book.id}
       />
     </div>
   );

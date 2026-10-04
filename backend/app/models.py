@@ -43,6 +43,10 @@ class Book(Base):
     author: Mapped[str] = mapped_column(String(255), nullable=False)
     full_text: Mapped[str] = mapped_column(Text, nullable=False)
     total_word_count: Mapped[int] = mapped_column(Integer, default=0)
+    # Decorative mood tint only - never scene imagery. Must be one of the
+    # themes defined in frontend/src/styles/themes.css; tests check that every
+    # theme keeps text contrast at WCAG AA.
+    theme: Mapped[str] = mapped_column(String(32), default="parchment", server_default="parchment")
 
     chapters: Mapped[list["Chapter"]] = relationship(
         back_populates="book", order_by="Chapter.index", cascade="all, delete-orphan"

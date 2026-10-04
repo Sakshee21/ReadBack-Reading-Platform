@@ -749,6 +749,129 @@ button {
   color: var(--accent);
 }
 
+/* ---------- Progress ring ---------- */
+
+.progress-ring {
+  flex: 0 0 auto;
+}
+
+.progress-ring-track {
+  stroke: var(--border);
+}
+
+.progress-ring-value {
+  stroke: var(--accent);
+}
+
+/* ---------- Session celebration ---------- */
+
+.celebration-layer {
+  position: fixed;
+  top: 4.5rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  /* never intercept a click meant for the autoplay countdown beneath */
+  pointer-events: none;
+  z-index: 26;
+}
+
+.celebration-badge {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface);
+  color: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+
+/* ---------- Settings panel ---------- */
+
+.settings-panel {
+  width: min(380px, 92vw);
+  height: 100%;
+  margin-left: auto;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--sans);
+}
+
+.settings-body {
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.75rem 0 0.25rem;
+  font-size: 0.95rem;
+}
+
+.settings-row select,
+.settings-row input[type="range"] {
+  margin-left: auto;
+}
+
+.settings-row select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+}
+
+.settings-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem;
+  line-height: 1.45;
+}
+
+.settings-warning {
+  font-size: 0.8rem;
+  color: var(--danger);
+  line-height: 1.45;
+}
+
+.settings-warning code {
+  font-size: 0.75rem;
+}
+
+.settings-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.25rem 0;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ambient-control {
+  display: flex;
+  flex-direction: column;
+}
+
 /* ---------- Reminder nudge ---------- */
 
 .nudge-banner {

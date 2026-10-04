@@ -254,24 +254,31 @@ FRANKENSTEIN_CHECKPOINT_QUESTIONS = [
     },
 ]
 
+# Decorative mood tint per book - a background wash only, never scene imagery,
+# so it can't compete with the reader's own mental picture. Theme names must
+# exist in frontend/src/styles/themes.css (tests enforce this and WCAG AA).
 SEED_BOOKS = [
     {
         "gutenberg_id": 1952,
+        "theme": "faded",
         "chapter_summaries": YELLOW_WALLPAPER_SUMMARIES,
         "checkpoints": [],
     },
     {
         "gutenberg_id": 11,
+        "theme": "meadow",
         "chapter_summaries": ALICE_SUMMARIES,
         "checkpoints": [{"chapter_index_trigger": 9, "questions": ALICE_CHECKPOINT_QUESTIONS}],
     },
     {
         "gutenberg_id": 74,
+        "theme": "sunlit",
         "chapter_summaries": {},
         "checkpoints": [{"chapter_index_trigger": 9, "questions": TOM_SAWYER_CHECKPOINT_QUESTIONS}],
     },
     {
         "gutenberg_id": 84,
+        "theme": "moonlit",
         "chapter_summaries": {},
         # Index 8 (not 5): chapter 0 is the framing letters, so index N is
         # Chapter N. Trigger 5 fired *before* the creature was animated in
@@ -281,6 +288,7 @@ SEED_BOOKS = [
     },
     {
         "gutenberg_id": 1342,
+        "theme": "rose",
         "chapter_summaries": {},
         # Index 15 (not 9) because chapter 0 here is front-matter (a preface),
         # shifting every real chapter's index up by one - and because the
@@ -299,6 +307,7 @@ def seed():
         db = SessionLocal()
         try:
             book = db.get(Book, book_id)
+            book.theme = entry["theme"]
 
             # Mark hand-authored chapters as 'manual' so the recap engine keeps
             # preferring them over any LLM recap. Done here (not only at import)

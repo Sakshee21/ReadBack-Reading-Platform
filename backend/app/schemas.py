@@ -38,6 +38,7 @@ class BookOut(BaseModel):
     author: str
     total_word_count: int
     chapter_count: int
+    theme: str = "parchment"
 
     class Config:
         from_attributes = True

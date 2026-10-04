@@ -1,7 +1,7 @@
-export default function StreakDisplay({ streak }) {
+export default function StreakDisplay({ streak, bump = false }) {
   if (!streak) return null;
   return (
-    <div className="streak-badge">
+    <div className={`streak-badge ${bump ? "bump" : ""}`}>
       <span className="flame">{streak.current_streak > 0 ? "🔥" : "💤"}</span>
       <div className="streak-numbers">
         <span className="streak-current">
