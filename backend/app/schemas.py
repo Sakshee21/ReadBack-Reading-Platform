@@ -163,6 +163,16 @@ class ProgressOut(BaseModel):
     progress_pct: float
 
 
+class PaceOut(BaseModel):
+    wpm_recent: float | None
+    wpm_average: float | None
+    sessions_counted: int
+    trend: str
+    is_estimate: bool
+    words_left: int | None = None
+    minutes_left_book: float | None = None
+
+
 class EventIn(BaseModel):
     event_type: str
     book_id: int | None = None

@@ -749,6 +749,44 @@ button {
   color: var(--accent);
 }
 
+/* ---------- Reading pace ---------- */
+
+.pace-badge {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  font-family: var(--sans);
+  white-space: nowrap;
+}
+
+.pace-wpm {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pace-trend {
+  margin-left: 0.25rem;
+  font-weight: 700;
+}
+
+.pace-trend.faster {
+  color: var(--success);
+}
+
+.pace-trend.slower {
+  color: var(--danger);
+}
+
+.pace-trend.steady {
+  color: var(--text-muted);
+}
+
+.pace-left {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
 /* ---------- Visualization artwork ---------- */
 
 .viz-artwork-figure {

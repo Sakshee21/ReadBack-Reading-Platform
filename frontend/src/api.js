@@ -70,6 +70,7 @@ export const api = {
     request("/checkpoints/submit", { method: "POST", body: { checkpoint_id: checkpointId, answers } }),
 
   getStreak: () => request("/streaks/me"),
+  getPace: (bookId) => request(`/pace/me${bookId ? `?book_id=${bookId}` : ""}`),
 };
 
 /**

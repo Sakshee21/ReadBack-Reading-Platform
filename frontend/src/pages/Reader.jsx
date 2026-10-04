@@ -7,12 +7,14 @@ import AutoplayCountdown from "../components/AutoplayCountdown";
 import RSVPMode from "../components/RSVPMode";
 import CheckpointQuiz from "../components/CheckpointQuiz";
 import StreakDisplay from "../components/StreakDisplay";
+import PaceDisplay from "../components/PaceDisplay";
 import SessionDrawer from "../components/SessionDrawer";
 
 export default function Reader() {
   const { bookId } = useParams();
   const [position, setPosition] = useState(null);
   const [streak, setStreak] = useState(null);
+  const [pace, setPace] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const [rsvpActive, setRsvpActive] = useState(false);
   const [countdownActive, setCountdownActive] = useState(false);
@@ -47,6 +49,9 @@ export default function Reader() {
       chapterId: log.chapterId,
       microSessionId: log.microSessionId,
       reason,
+      // word_count travels with active_ms so reading pace is derivable from
+      // the event log alone (see services/pace.py).
+      word_count: log.wordCount,
       active_ms: Math.max(0, now - log.startedAt - hidden),
     });
     sessionLog.current = null;
@@ -75,10 +80,11 @@ export default function Reader() {
     setPosition(null);
     setBookFinished(false);
     startedForMicroSession.current = null;
-    Promise.all([api.getReaderPosition(bookId), api.getStreak()])
-      .then(([pos, streakData]) => {
+    Promise.all([api.getReaderPosition(bookId), api.getStreak(), api.getPace(bookId)])
+      .then(([pos, streakData, paceData]) => {
         setPosition(pos);
         setStreak(streakData);
+        setPace(paceData);
       })
       .catch((err) => setError(err.message || "Could not load this book"));
   }, [bookId]);
@@ -98,7 +104,13 @@ export default function Reader() {
       .then((session) => {
         setSessionId(session.id);
         endSessionLog("advance");
-        sessionLog.current = { ...ctx, startedAt: Date.now(), hiddenAccum: 0, hiddenSince: null };
+        sessionLog.current = {
+          ...ctx,
+          wordCount: position.micro_session.word_count,
+          startedAt: Date.now(),
+          hiddenAccum: 0,
+          hiddenSince: null,
+        };
         logEvent("session_start", { ...ctx, word_count: position.micro_session.word_count });
       })
       .catch((err) => setError(err.message || "Could not start session"));
@@ -259,6 +271,23 @@ export default function Reader() {
       prevStreak.current = result.streak;
       setStreak(result.streak);
       setSessionId(null);
+
+      // Refresh pace once per completed session - the session_end event this
+      // completion just logged is the newest sample.
+      api
+        .getPace(bookId)
+        .then((fresh) => {
+          setPace(fresh);
+          if (fresh.wpm_average) {
+            logEvent("pace_updated", {
+              bookId: ctx.bookId,
+              wpm_recent: fresh.wpm_recent,
+              wpm_average: fresh.wpm_average,
+              trend: fresh.trend,
+            });
+          }
+        })
+        .catch(() => {});
       if (result.finished_book) {
         setBookFinished(true);
       } else {
@@ -311,6 +340,7 @@ export default function Reader() {
         </div>
         <div className="controls">
           <StreakDisplay streak={streak} />
+          <PaceDisplay pace={pace} />
           <button
             className={`icon-btn ${rsvpActive ? "active" : ""}`}
             onClick={() => setRsvpActive((a) => !a)}
