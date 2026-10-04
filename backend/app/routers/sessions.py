@@ -3,6 +3,7 @@ import datetime as dt
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
 from app.deps import get_current_user
 from app.models import (
@@ -22,6 +23,7 @@ from app.schemas import (
     SessionStart,
     StreakOut,
 )
+from app.services.checkpoint import is_quiz_due
 from app.services.progression import build_block, ordered_micro_sessions, size_level_for
 from app.services.streak import apply_completed_session
 
@@ -115,7 +117,9 @@ def complete_session(
     db.commit()
 
     checkpoint_due = None
-    if next_micro and next_micro.index == 0:
+    if next_micro and next_micro.index == 0 and is_quiz_due(
+        next_micro.chapter.index, settings.quiz_every_n_chapters
+    ):
         checkpoint = (
             db.query(ComprehensionCheckpoint)
             .filter(

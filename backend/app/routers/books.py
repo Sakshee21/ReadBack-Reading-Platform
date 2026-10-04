@@ -26,6 +26,7 @@ from app.schemas import (
     ProgressOut,
     ReaderPositionOut,
 )
+from app.services.checkpoint import is_quiz_due
 from app.services.progression import build_block, ordered_micro_sessions, size_level_for
 from app.services.recap import choose_recap, needs_recap
 
@@ -92,6 +93,8 @@ def _get_or_create_progress(db: Session, user: User, book: Book) -> UserBookProg
 
 def _checkpoint_due(db: Session, user: User, book: Book, chapter: Chapter, micro_session: MicroSession):
     if micro_session.index != 0:
+        return None
+    if not is_quiz_due(chapter.index, settings.quiz_every_n_chapters):
         return None
     checkpoint = (
         db.query(ComprehensionCheckpoint)

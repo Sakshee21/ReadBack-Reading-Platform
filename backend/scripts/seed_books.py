@@ -47,29 +47,48 @@ YELLOW_WALLPAPER_SUMMARIES = {
     "woman within it who comes to mirror her own unraveling sanity.",
 }
 
+# Every question set below is spoiler-safe for its trigger chapter: it only
+# refers to events the reader has already finished. See SEED.md.
+
 ALICE_CHECKPOINT_QUESTIONS = [
     {
         "id": "q1",
-        "type": "timeline",
-        "prompt": "Which of these events happened first in the story?",
-        "options": [
-            "Alice attends the Mad Tea-Party",
-            "Alice falls down the rabbit-hole",
-            "Alice hears the Mock Turtle's story",
-            "Alice joins the Queen's croquet game",
+        "question_type": "sequencing",
+        "prompt": "Put these events in the order they happen.",
+        "items": [
+            "Alice argues with the Hatter at the Mad Tea-Party",
+            "Alice follows the White Rabbit down the rabbit-hole",
+            "The White Rabbit mistakes Alice for his housemaid Mary Ann",
+            "Alice swims through the pool of her own tears",
         ],
-        "answer": "Alice falls down the rabbit-hole",
+        "answer": [
+            "Alice follows the White Rabbit down the rabbit-hole",
+            "Alice swims through the pool of her own tears",
+            "The White Rabbit mistakes Alice for his housemaid Mary Ann",
+            "Alice argues with the Hatter at the Mad Tea-Party",
+        ],
     },
     {
         "id": "q2",
-        "type": "character",
-        "prompt": "Who teaches Alice that eating a mushroom can change her size?",
-        "options": ["The White Rabbit", "The Caterpillar", "The Cheshire Cat", "The Duchess"],
-        "answer": "The Caterpillar",
+        "question_type": "relationship",
+        "prompt": "Match each character to how Alice meets them.",
+        "left_items": ["The Caterpillar", "The Cheshire Cat", "The Duchess", "The Queen of Hearts"],
+        "options": [
+            "Sits on a mushroom smoking a hookah",
+            "Vanishes slowly until only a grin is left",
+            "Nurses a baby that turns into a pig",
+            "Calls for beheadings during the croquet game",
+        ],
+        "answer": {
+            "The Caterpillar": "Sits on a mushroom smoking a hookah",
+            "The Cheshire Cat": "Vanishes slowly until only a grin is left",
+            "The Duchess": "Nurses a baby that turns into a pig",
+            "The Queen of Hearts": "Calls for beheadings during the croquet game",
+        },
     },
     {
         "id": "q3",
-        "type": "inference",
+        "question_type": "inference",
         "prompt": "What does the Cheshire Cat's habit of slowly vanishing until only its "
         "grin remains suggest about Wonderland?",
         "options": [
@@ -85,31 +104,42 @@ ALICE_CHECKPOINT_QUESTIONS = [
 PRIDE_AND_PREJUDICE_CHECKPOINT_QUESTIONS = [
     {
         "id": "q1",
-        "type": "timeline",
-        "prompt": "Which of these happens first?",
-        "options": [
-            "Mr. Bingley moves into Netherfield Park",
-            "Elizabeth walks to Netherfield to nurse a sick Jane",
-            "Mr. Collins proposes to Elizabeth",
-            "Mr. Darcy first proposes to Elizabeth",
+        "question_type": "sequencing",
+        "prompt": "Put these events in the order they happen.",
+        "items": [
+            "Jane falls ill and Elizabeth walks to Netherfield to nurse her",
+            "Mr. Bingley takes possession of Netherfield Park",
+            "Mr. Collins arrives at Longbourn as the family's heir",
+            "Mr. Darcy slights Elizabeth at the Meryton assembly",
         ],
-        "answer": "Mr. Bingley moves into Netherfield Park",
+        "answer": [
+            "Mr. Bingley takes possession of Netherfield Park",
+            "Mr. Darcy slights Elizabeth at the Meryton assembly",
+            "Jane falls ill and Elizabeth walks to Netherfield to nurse her",
+            "Mr. Collins arrives at Longbourn as the family's heir",
+        ],
     },
     {
         "id": "q2",
-        "type": "character",
-        "prompt": "How is Mr. Collins related to the Bennet family?",
+        "question_type": "relationship",
+        "prompt": "Match each character to their place in the story.",
+        "left_items": ["Mr. Collins", "Mr. Bingley", "Charlotte Lucas", "Mrs. Bennet"],
         "options": [
-            "Mrs. Bennet's brother",
-            "Mr. Bennet's cousin and heir to Longbourn",
-            "Jane's fiancé",
-            "Mr. Darcy's uncle",
+            "The clergyman cousin who will inherit Longbourn",
+            "The wealthy newcomer who rents Netherfield",
+            "Elizabeth's closest friend in Meryton",
+            "The mother determined to see her daughters married",
         ],
-        "answer": "Mr. Bennet's cousin and heir to Longbourn",
+        "answer": {
+            "Mr. Collins": "The clergyman cousin who will inherit Longbourn",
+            "Mr. Bingley": "The wealthy newcomer who rents Netherfield",
+            "Charlotte Lucas": "Elizabeth's closest friend in Meryton",
+            "Mrs. Bennet": "The mother determined to see her daughters married",
+        },
     },
     {
         "id": "q3",
-        "type": "inference",
+        "question_type": "inference",
         "prompt": "Why does Mr. Darcy initially seem unpleasant to the Bennet family at "
         "the Meryton assembly?",
         "options": [
@@ -127,26 +157,42 @@ PRIDE_AND_PREJUDICE_CHECKPOINT_QUESTIONS = [
 TOM_SAWYER_CHECKPOINT_QUESTIONS = [
     {
         "id": "q1",
-        "type": "timeline",
-        "prompt": "Which of these happens first?",
-        "options": [
-            "Tom tricks other boys into whitewashing the fence for him",
-            "Tom and Huck witness Injun Joe kill Doc Robinson in the graveyard",
-            "Tom runs away to Jackson's Island",
-            "Tom is nearly caught by Injun Joe in the courtroom",
+        "question_type": "sequencing",
+        "prompt": "Put these events in the order they happen.",
+        "items": [
+            "Tom and Huck take a dead cat to the graveyard at midnight",
+            "Tom tricks the other boys into whitewashing the fence for him",
+            "Tom and Huck see Injun Joe kill Dr. Robinson",
+            "Tom trades tickets for a Bible prize at Sunday school",
         ],
-        "answer": "Tom tricks other boys into whitewashing the fence for him",
+        "answer": [
+            "Tom tricks the other boys into whitewashing the fence for him",
+            "Tom trades tickets for a Bible prize at Sunday school",
+            "Tom and Huck take a dead cat to the graveyard at midnight",
+            "Tom and Huck see Injun Joe kill Dr. Robinson",
+        ],
     },
     {
         "id": "q2",
-        "type": "character",
-        "prompt": "Who is Tom's partner in mischief who lives outside conventional society?",
-        "options": ["Sid", "Huckleberry Finn", "Joe Harper", "Ben Rogers"],
-        "answer": "Huckleberry Finn",
+        "question_type": "relationship",
+        "prompt": "Match each character to their relationship to Tom.",
+        "left_items": ["Aunt Polly", "Sid", "Huckleberry Finn", "Becky Thatcher"],
+        "options": [
+            "Tom's aunt and guardian",
+            "Tom's well-behaved brother, who tells on him",
+            "The outcast boy Tom roams with",
+            "The judge's daughter Tom falls for",
+        ],
+        "answer": {
+            "Aunt Polly": "Tom's aunt and guardian",
+            "Sid": "Tom's well-behaved brother, who tells on him",
+            "Huckleberry Finn": "The outcast boy Tom roams with",
+            "Becky Thatcher": "The judge's daughter Tom falls for",
+        },
     },
     {
         "id": "q3",
-        "type": "inference",
+        "question_type": "inference",
         "prompt": "Why do Tom and Huck decide to keep silent about witnessing the murder?",
         "options": [
             "They didn't actually see anything",
@@ -161,26 +207,42 @@ TOM_SAWYER_CHECKPOINT_QUESTIONS = [
 FRANKENSTEIN_CHECKPOINT_QUESTIONS = [
     {
         "id": "q1",
-        "type": "timeline",
-        "prompt": "Which of these happens first?",
-        "options": [
-            "Victor Frankenstein creates and animates his creature",
-            "The creature murders William",
-            "Victor marries Elizabeth",
-            "The creature demands that Victor create him a companion",
+        "question_type": "sequencing",
+        "prompt": "Put these events in the order they happen.",
+        "items": [
+            "Victor brings his creature to life and flees in horror",
+            "Robert Walton's ship finds Victor adrift on the ice",
+            "Victor learns that his brother William has been murdered",
+            "Victor leaves home to study at Ingolstadt",
         ],
-        "answer": "Victor Frankenstein creates and animates his creature",
+        "answer": [
+            "Robert Walton's ship finds Victor adrift on the ice",
+            "Victor leaves home to study at Ingolstadt",
+            "Victor brings his creature to life and flees in horror",
+            "Victor learns that his brother William has been murdered",
+        ],
     },
     {
         "id": "q2",
-        "type": "character",
-        "prompt": "Who narrates the outer frame of the novel, encountering Victor in the Arctic?",
-        "options": ["Henry Clerval", "Robert Walton", "Alphonse Frankenstein", "Victor's creature"],
-        "answer": "Robert Walton",
+        "question_type": "relationship",
+        "prompt": "Match each character to their role in the story so far.",
+        "left_items": ["Robert Walton", "Henry Clerval", "Elizabeth Lavenza", "William Frankenstein"],
+        "options": [
+            "The Arctic explorer who narrates the outer frame",
+            "Victor's closest friend, who nurses him through his illness",
+            "Victor's beloved companion, raised alongside him in his family",
+            "Victor's young brother, found murdered",
+        ],
+        "answer": {
+            "Robert Walton": "The Arctic explorer who narrates the outer frame",
+            "Henry Clerval": "Victor's closest friend, who nurses him through his illness",
+            "Elizabeth Lavenza": "Victor's beloved companion, raised alongside him in his family",
+            "William Frankenstein": "Victor's young brother, found murdered",
+        },
     },
     {
         "id": "q3",
-        "type": "inference",
+        "question_type": "inference",
         "prompt": "Why does Victor abandon his creature immediately after bringing it to life?",
         "options": [
             "He is called away on urgent business",
@@ -211,7 +273,11 @@ SEED_BOOKS = [
     {
         "gutenberg_id": 84,
         "chapter_summaries": {},
-        "checkpoints": [{"chapter_index_trigger": 5, "questions": FRANKENSTEIN_CHECKPOINT_QUESTIONS}],
+        # Index 8 (not 5): chapter 0 is the framing letters, so index N is
+        # Chapter N. Trigger 5 fired *before* the creature was animated in
+        # Chapter 5, making its own questions spoilers. 8 means Letters plus
+        # Chapters 1-7 are read - the creation and William's death included.
+        "checkpoints": [{"chapter_index_trigger": 8, "questions": FRANKENSTEIN_CHECKPOINT_QUESTIONS}],
     },
     {
         "gutenberg_id": 1342,
@@ -241,25 +307,27 @@ def seed():
                 if entry["chapter_summaries"].get(chapter.index) and chapter.recap_source != "manual":
                     chapter.recap_source = "manual"
 
-            for checkpoint_data in entry["checkpoints"]:
-                existing = (
-                    db.query(ComprehensionCheckpoint)
-                    .filter(
-                        ComprehensionCheckpoint.book_id == book.id,
-                        ComprehensionCheckpoint.chapter_index_trigger
-                        == checkpoint_data["chapter_index_trigger"],
+            # Upsert rather than skip, so re-seeding an existing database picks
+            # up edited questions and corrected trigger chapters. Checkpoint
+            # rows are updated in place to keep past attempts referencing them.
+            existing = (
+                db.query(ComprehensionCheckpoint)
+                .filter(ComprehensionCheckpoint.book_id == book.id)
+                .order_by(ComprehensionCheckpoint.id)
+                .all()
+            )
+            for i, checkpoint_data in enumerate(entry["checkpoints"]):
+                if i < len(existing):
+                    existing[i].chapter_index_trigger = checkpoint_data["chapter_index_trigger"]
+                    existing[i].questions = checkpoint_data["questions"]
+                else:
+                    db.add(
+                        ComprehensionCheckpoint(
+                            book_id=book.id,
+                            chapter_index_trigger=checkpoint_data["chapter_index_trigger"],
+                            questions=checkpoint_data["questions"],
+                        )
                     )
-                    .first()
-                )
-                if existing:
-                    continue
-                db.add(
-                    ComprehensionCheckpoint(
-                        book_id=book.id,
-                        chapter_index_trigger=checkpoint_data["chapter_index_trigger"],
-                        questions=checkpoint_data["questions"],
-                    )
-                )
             db.commit()
         finally:
             db.close()

@@ -1,4 +1,5 @@
 import datetime as dt
+from typing import Any
 
 from pydantic import BaseModel, EmailStr
 
@@ -138,7 +139,8 @@ class CheckpointOut(BaseModel):
 
 class CheckpointSubmit(BaseModel):
     checkpoint_id: int
-    answers: dict[str, str]
+    # str for inference, list[str] for sequencing, dict[str, str] for relationship
+    answers: dict[str, Any]
 
 
 class CheckpointResultOut(BaseModel):

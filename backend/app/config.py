@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     # recap (default 7 days).
     recap_long_gap_hours: int = 24 * 7
     checkpoint_interval: int = 10
+    # Serve an authored checkpoint only at chapters where index % N == 0.
+    # 1 = every authored checkpoint fires.
+    quiz_every_n_chapters: int = 1
     # Groq is used offline by scripts/generate_recaps.py only. The app never
     # calls an LLM at request time, so an empty key is fine at runtime.
     groq_api_key: str = ""
