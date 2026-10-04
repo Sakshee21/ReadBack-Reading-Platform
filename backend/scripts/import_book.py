@@ -90,7 +90,8 @@ def import_book(
         db.flush()
 
         for idx, chapter_data in enumerate(chapters_data):
-            summary = chapter_summaries.get(idx) or _fallback_summary(chapter_data["text"])
+            manual = chapter_summaries.get(idx)
+            summary = manual or _fallback_summary(chapter_data["text"])
             chapter = Chapter(
                 book_id=book.id,
                 index=idx,
@@ -98,6 +99,7 @@ def import_book(
                 text=chapter_data["text"],
                 word_count=word_count(chapter_data["text"]),
                 summary=summary,
+                recap_source="manual" if manual else "extractive",
             )
             db.add(chapter)
             db.flush()

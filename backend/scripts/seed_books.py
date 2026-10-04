@@ -233,6 +233,14 @@ def seed():
         db = SessionLocal()
         try:
             book = db.get(Book, book_id)
+
+            # Mark hand-authored chapters as 'manual' so the recap engine keeps
+            # preferring them over any LLM recap. Done here (not only at import)
+            # so books imported before recap_source existed get reconciled too.
+            for chapter in book.chapters:
+                if entry["chapter_summaries"].get(chapter.index) and chapter.recap_source != "manual":
+                    chapter.recap_source = "manual"
+
             for checkpoint_data in entry["checkpoints"]:
                 existing = (
                     db.query(ComprehensionCheckpoint)

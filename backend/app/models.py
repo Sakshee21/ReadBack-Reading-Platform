@@ -61,6 +61,14 @@ class Chapter(Base):
     word_count: Mapped[int] = mapped_column(Integer, default=0)
     is_cliffhanger_break: Mapped[bool] = mapped_column(Boolean, default=True)
     summary: Mapped[str] = mapped_column(Text, default="")
+    # Recap cache, all generated offline at seed time - never at request time.
+    # recap_source records which of manual/llm/extractive the effective recap
+    # comes from; see services/recap.effective_recap for the precedence.
+    recap_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    story_so_far: Mapped[str | None] = mapped_column(Text, nullable=True)
+    recap_source: Mapped[str] = mapped_column(
+        String(16), default="extractive", server_default="extractive"
+    )
 
     book: Mapped["Book"] = relationship(back_populates="chapters")
     micro_sessions: Mapped[list["MicroSession"]] = relationship(

@@ -27,7 +27,7 @@ from app.schemas import (
     ReaderPositionOut,
 )
 from app.services.progression import build_block, ordered_micro_sessions, size_level_for
-from app.services.recap import build_recap, needs_recap
+from app.services.recap import choose_recap, needs_recap
 
 router = APIRouter(prefix="/books", tags=["books"])
 
@@ -147,9 +147,11 @@ def _build_reader_position(
     )
 
     recap = None
-    if needs_recap(progress.last_read_at, dt.datetime.utcnow(), settings.recap_gap_hours):
-        summaries = [c.summary for c in book.chapters]
-        recap = build_recap(summaries, chapter.index) or None
+    now = dt.datetime.utcnow()
+    if needs_recap(progress.last_read_at, now, settings.recap_gap_hours):
+        hours_since = (now - progress.last_read_at).total_seconds() / 3600
+        chapters = sorted(book.chapters, key=lambda c: c.index)
+        recap = choose_recap(chapters, chapter.index, hours_since, settings.recap_long_gap_hours) or None
 
     checkpoint = _checkpoint_due(db, user, book, chapter, micro_session)
 
