@@ -349,7 +349,14 @@ export default function Reader() {
           ) : (
             position.micro_session.text.split(/\n{2,}/).map((paragraph, i) => <p key={i}>{paragraph}</p>)
           )}
-          {position.micro_session.has_visualization_prompt && <VisualizationPrompt {...logCtx} />}
+          {position.micro_session.has_visualization_prompt && (
+            <VisualizationPrompt
+              {...logCtx}
+              image={position.micro_session.visualization_image}
+              alt={position.micro_session.visualization_alt}
+              attribution={position.micro_session.visualization_attribution}
+            />
+          )}
         </div>
       </div>
 

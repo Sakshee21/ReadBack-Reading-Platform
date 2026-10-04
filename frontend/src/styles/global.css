@@ -690,6 +690,30 @@ button {
   color: var(--accent);
 }
 
+/* ---------- Visualization artwork ---------- */
+
+.viz-artwork-figure {
+  margin: 1rem 0 0;
+}
+
+.viz-artwork-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.viz-attribution {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
 /* ---------- Recap dismiss ---------- */
 
 .recap-banner .recap-dismiss {

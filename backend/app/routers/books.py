@@ -137,6 +137,9 @@ def _build_reader_position(
     if not block:
         block = [micro_session]
 
+    # The block shows one visualization checkpoint: use the artwork from the
+    # first micro-session in it that actually has one.
+    illustrated = next((ms for ms in block if ms.visualization_image), None)
     merged = MicroSessionOut(
         id=block[0].id,
         index=block[0].index,
@@ -144,6 +147,9 @@ def _build_reader_position(
         word_count=sum(ms.word_count for ms in block),
         is_cliffhanger_break=block[-1].is_cliffhanger_break,
         has_visualization_prompt=any(ms.has_visualization_prompt for ms in block),
+        visualization_image=illustrated.visualization_image if illustrated else None,
+        visualization_alt=illustrated.visualization_alt if illustrated else None,
+        visualization_attribution=illustrated.visualization_attribution if illustrated else None,
     )
 
     recap = None
