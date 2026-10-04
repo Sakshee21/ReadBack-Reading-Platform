@@ -21,6 +21,50 @@ CHAPTER_HEADING_RE = re.compile(
     re.MULTILINE,
 )
 
+# Books that divide themselves up without the word "chapter" - Sherlock Holmes
+# uses "ADVENTURE I.", A Christmas Carol "STAVE I", Frankenstein "Letter 1".
+ALT_HEADING_RE = re.compile(
+    r"^[ \t]*(ADVENTURE|Adventure|LETTER|Letter|STAVE|Stave|CANTO|Canto|BOOK|Book|PART|Part|STORY|Story)"
+    r"[ \t]+([IVXLCDM]+|\d+|[A-Za-z]+)\.?[ \t]*[:.\-]?[ \t]*(.*)$",
+    re.MULTILINE,
+)
+
+# Bare numbered headings ("I.", "II. The Mail", "1."). The trailing period is
+# required: without it every line starting with the pronoun "I" would match.
+BARE_NUMERAL_HEADING_RE = re.compile(
+    r"^[ \t]*([IVXLCDM]{1,7}|\d{1,3})\.[ \t]*(.*)$",
+    re.MULTILINE,
+)
+
+# A numeral completely alone on its line, as Kafka's Metamorphosis numbers its
+# three parts. The empty second group keeps the (number, title) shape.
+BARE_NUMERAL_LINE_RE = re.compile(
+    r"^[ \t]*([IVXLCDM]{1,7}|\d{1,3})[ \t]*()$",
+    re.MULTILINE,
+)
+
+# (pattern, number group, title group), tried in order of how much we trust them.
+HEADING_PATTERNS = [
+    (CHAPTER_HEADING_RE, 2, 3),
+    (ALT_HEADING_RE, 2, 3),
+    (BARE_NUMERAL_HEADING_RE, 1, 2),
+    (BARE_NUMERAL_LINE_RE, 1, 2),
+]
+
+# The loose patterns need a sanity check on the numbering before we trust them.
+BARE_PATTERNS = {BARE_NUMERAL_HEADING_RE, BARE_NUMERAL_LINE_RE}
+
+# A Table of Contents is a dense run of headings with almost no prose between
+# them. A numbering restart with real chapters in between is a structural
+# restart ("Book the Second, Chapter I"), and discarding those would lose half
+# the book - so only a tightly packed run counts as a ToC.
+TOC_MAX_GAP_WORDS = 300
+
+# Only fall back to fixed-size sections for a book long enough that "one
+# chapter" is clearly a detection failure rather than a genuine short story.
+FALLBACK_MIN_WORDS = 15_000
+FALLBACK_SECTION_WORDS = 3_000
+
 WORDS_PER_MINUTE = 200
 
 
@@ -65,7 +109,8 @@ def _parse_chapter_number(token: str) -> int | None:
     return _roman_to_int(token)
 
 
-def _find_real_chapters_start(matches: list[re.Match]) -> int:
+def _find_real_chapters_start(matches: list[re.Match], num_group: int = 2,
+                              clean_text: str | None = None) -> int:
     """A Table of Contents lists every chapter heading again, numbered
     1..N, before the real chapters repeat that same 1..N sequence. Rather
     than guessing from surrounding whitespace, use that restart itself as
@@ -73,12 +118,30 @@ def _find_real_chapters_start(matches: list[re.Match]) -> int:
     sequence) and discard everything before it. Books with no ToC at all
     have their real "Chapter 1" as the only/first such match, so nothing is
     discarded. Headings with non-numeric titles (unparseable) leave the
-    heuristic a no-op."""
+    heuristic a no-op.
+
+    A restart is only a ToC when the headings before it are packed together
+    with no real prose between them. A novel in several "Books" renumbers from
+    I each time, and those headings have whole chapters between them - treating
+    that as a ToC would throw away everything before the final Book."""
     restart_index = 0
     for i, match in enumerate(matches):
-        if _parse_chapter_number(match.group(2)) == 1:
-            restart_index = i
+        if _parse_chapter_number(match.group(num_group)) != 1:
+            continue
+        if i >= 2 and clean_text is not None and not _is_dense_listing(matches[:i], clean_text):
+            continue
+        restart_index = i
     return restart_index
+
+
+def _is_dense_listing(matches: list[re.Match], clean_text: str) -> bool:
+    """True when consecutive headings have almost nothing between them, i.e.
+    they are ToC entries rather than real chapters."""
+    gaps = [
+        word_count(clean_text[a.end() : b.start()])
+        for a, b in zip(matches, matches[1:])
+    ]
+    return bool(gaps) and max(gaps) < TOC_MAX_GAP_WORDS
 
 
 def _looks_like_listing(text: str, min_lines: int = 8, avg_word_threshold: float = 5.0) -> bool:
@@ -92,14 +155,72 @@ def _looks_like_listing(text: str, min_lines: int = 8, avg_word_threshold: float
     return avg_words < avg_word_threshold
 
 
-def split_into_chapters(clean_text: str) -> list[dict]:
-    """Split on CHAPTER headings. Falls back to one chapter if no heading found
-    (e.g. short stories like *The Yellow Wallpaper*)."""
-    all_matches = list(CHAPTER_HEADING_RE.finditer(clean_text))
-    if not all_matches:
-        return [{"title": "", "text": clean_text.strip()}]
+def split_into_fixed_sections(text: str, section_words: int = FALLBACK_SECTION_WORDS) -> list[dict]:
+    """Last-resort split for a long book whose headings we cannot detect, so
+    the pipeline never hands back one enormous chapter."""
+    paragraphs = split_paragraphs(text)
+    if not paragraphs:
+        return [{"title": "", "text": text.strip()}]
 
-    restart_index = _find_real_chapters_start(all_matches)
+    sections: list[dict] = []
+    current: list[str] = []
+    count = 0
+    for para in paragraphs:
+        words = word_count(para)
+        if current and count + words > section_words:
+            sections.append({"title": "", "text": "\n\n".join(current)})
+            current, count = [], 0
+        current.append(para)
+        count += words
+    if current:
+        sections.append({"title": "", "text": "\n\n".join(current)})
+    return sections
+
+
+def _is_plausible_sequence(matches: list[re.Match], num_group: int) -> bool:
+    """Guard the loose bare-numeral pattern: real chapter numbering starts at
+    1/I and mostly counts upwards, whereas stray matches are unordered."""
+    numbers = [_parse_chapter_number(m.group(num_group)) for m in matches]
+    numbers = [n for n in numbers if n is not None]
+    if len(numbers) < 3 or numbers[0] != 1:
+        return False
+    ascending = sum(1 for a, b in zip(numbers, numbers[1:]) if b == a + 1)
+    return ascending >= len(numbers) * 0.6
+
+
+def split_into_chapters(clean_text: str) -> list[dict]:
+    """Split a book into chapters.
+
+    Heading styles are tried in order of trust: "CHAPTER N", then alternatives
+    like "ADVENTURE N"/"STAVE N", then bare numbered headings. The first style
+    that yields more than one chapter wins, so books that already worked keep
+    their exact segmentation. A long book that matches nothing is cut into
+    fixed-size sections; a genuinely short one stays a single chapter.
+    """
+    is_long = word_count(clean_text) >= FALLBACK_MIN_WORDS
+    for pattern, num_group, title_group in HEADING_PATTERNS:
+        chapters = _split_on_headings(clean_text, pattern, num_group, title_group)
+        if len(chapters) > 1:
+            return chapters
+        # A single heading is a real result for a short text, but in a whole
+        # novel it means one stray match - keep looking for a better style.
+        if len(chapters) == 1 and not is_long:
+            return chapters
+
+    if is_long:
+        return split_into_fixed_sections(clean_text)
+    return [{"title": "", "text": clean_text.strip()}]
+
+
+def _split_on_headings(clean_text: str, pattern: re.Pattern, num_group: int,
+                       title_group: int) -> list[dict]:
+    all_matches = list(pattern.finditer(clean_text))
+    if not all_matches:
+        return []
+    if pattern in BARE_PATTERNS and not _is_plausible_sequence(all_matches, num_group):
+        return []
+
+    restart_index = _find_real_chapters_start(all_matches, num_group, clean_text)
     matches = all_matches[restart_index:]
 
     # Some books (e.g. Tom Sawyer) carry the descriptive chapter title only in
@@ -107,8 +228,8 @@ def split_into_chapters(clean_text: str) -> list[dict]:
     # Recover those by number so real chapters can reuse them.
     toc_titles: dict[int, str] = {}
     for toc_match in all_matches[:restart_index]:
-        number = _parse_chapter_number(toc_match.group(2))
-        toc_title = toc_match.group(3).strip() if toc_match.group(3) else ""
+        number = _parse_chapter_number(toc_match.group(num_group))
+        toc_title = toc_match.group(title_group).strip() if toc_match.group(title_group) else ""
         if number is not None and toc_title:
             toc_titles[number] = toc_title
 
@@ -117,8 +238,9 @@ def split_into_chapters(clean_text: str) -> list[dict]:
         start = match.start()
         end = matches[i + 1].start() if i + 1 < len(matches) else len(clean_text)
         heading_line = match.group(0).strip()
-        same_line_title = re.sub(r"^[\]\)\s]+", "", match.group(3).strip()) if match.group(3) else ""
-        number = _parse_chapter_number(match.group(2))
+        raw_title = match.group(title_group)
+        same_line_title = re.sub(r"^[\]\)\s]+", "", raw_title.strip()) if raw_title else ""
+        number = _parse_chapter_number(match.group(num_group))
         title = same_line_title or toc_titles.get(number, "")
 
         # Drop the heading match itself from the stored body (its title is

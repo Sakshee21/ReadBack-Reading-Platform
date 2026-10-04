@@ -20,3 +20,5 @@ backend/recaps_review.md
 # Downloaded artwork is reproducible from data/visualization_manifest.json
 backend/static/visualizations/*
 !backend/static/visualizations/.gitkeep
+
+backend/tests/fixtures/books/
