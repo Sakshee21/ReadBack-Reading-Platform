@@ -438,22 +438,58 @@ button {
   font-style: italic;
 }
 
-.viz-artwork {
-  margin-top: 1rem;
-  height: 160px;
-  border-radius: 8px;
-  background: repeating-linear-gradient(
-    45deg,
-    var(--border),
-    var(--border) 10px,
-    var(--bg) 10px,
-    var(--bg) 20px
-  );
+.viz-rating-label {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+}
+
+.viz-rating {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.viz-rating-btn {
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.viz-rating-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.viz-rating-scale {
+  display: flex;
+  justify-content: space-between;
+  max-width: 15rem;
+  margin: 0.45rem auto 0;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.viz-rated {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.75rem;
+  font-family: var(--sans);
+  font-size: 0.9rem;
   color: var(--text-muted);
-  font-size: 0.85rem;
+}
+
+.viz-skip {
+  margin-top: 0.9rem;
 }
 
 /* ---------- Autoplay countdown ---------- */
@@ -955,30 +991,6 @@ button {
 .pace-left {
   font-size: 0.7rem;
   color: var(--text-muted);
-}
-
-/* ---------- Visualization artwork ---------- */
-
-.viz-artwork-figure {
-  margin: 1rem 0 0;
-}
-
-.viz-artwork-image {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  margin: 0 auto;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-}
-
-.viz-attribution {
-  font-family: var(--sans);
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 0.5rem;
-  text-align: center;
 }
 
 /* ---------- Recap dismiss ---------- */

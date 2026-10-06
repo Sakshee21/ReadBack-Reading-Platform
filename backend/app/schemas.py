@@ -51,9 +51,6 @@ class MicroSessionOut(BaseModel):
     word_count: int
     is_cliffhanger_break: bool
     has_visualization_prompt: bool
-    visualization_image: str | None = None
-    visualization_alt: str | None = None
-    visualization_attribution: str | None = None
 
     class Config:
         from_attributes = True

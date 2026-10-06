@@ -18,18 +18,13 @@ All book text comes from [Project Gutenberg](https://www.gutenberg.org/) and is
 in the **public domain** in the United States. Text is downloaded at seed time
 by `backend/scripts/import_book.py`; it is not committed to the repo.
 
-## Visualization artwork
+## Visualization artwork — removed by design
 
-Illustrations are listed in `backend/data/visualization_manifest.json`, each with
-its own `source_url`, `attribution` and `license` field. Currently applied:
-
-| Source | Licence | Notes |
-|---|---|---|
-| True Williams illustrations for *The Adventures of Tom Sawyer* (1876), via the Project Gutenberg edition of book #74 | Public domain | 3 images applied; 42 more auto-matched and awaiting human review |
-
-Downloaded image files live in `backend/static/visualizations/` and are
-gitignored — they rebuild from the manifest with
-`python -m scripts.visualization_images --apply`.
+There is none, deliberately. The "Picture this scene" checkpoint is
+imagination-only: revealing a picture would supply the very imagery that
+reading is meant to make the reader generate, which undercuts the dual-coding
+rationale the project rests on. The image pipeline, manifest and curated
+illustrations were removed in favour of an optional "how vivid was it?" rating.
 
 ## Ambient audio
 

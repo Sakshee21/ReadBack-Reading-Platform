@@ -92,12 +92,10 @@ class MicroSession(Base):
     text: Mapped[str] = mapped_column(Text, nullable=False)
     word_count: Mapped[int] = mapped_column(Integer, default=0)
     is_cliffhanger_break: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Flags a "Picture this scene" checkpoint. There is no artwork: the reveal
+    # was removed deliberately so nothing supplies the imagery the reader is
+    # meant to generate (see CLAUDE.md section 8).
     has_visualization_prompt: Mapped[bool] = mapped_column(Boolean, default=False)
-    # Curated artwork for the visualization checkpoint, attached offline by
-    # scripts/visualization_images.py. Path is relative to backend/static/.
-    visualization_image: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    visualization_alt: Mapped[str | None] = mapped_column(Text, nullable=True)
-    visualization_attribution: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     chapter: Mapped["Chapter"] = relationship(back_populates="micro_sessions")
 

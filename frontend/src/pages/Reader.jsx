@@ -464,14 +464,7 @@ export default function Reader() {
                 .map((paragraph, i) => <p key={i}>{paragraph}</p>)}
             </div>
           )}
-          {position.micro_session.has_visualization_prompt && (
-            <VisualizationPrompt
-              {...logCtx}
-              image={position.micro_session.visualization_image}
-              alt={position.micro_session.visualization_alt}
-              attribution={position.micro_session.visualization_attribution}
-            />
-          )}
+          {position.micro_session.has_visualization_prompt && <VisualizationPrompt {...logCtx} />}
         </div>
       </div>
 
