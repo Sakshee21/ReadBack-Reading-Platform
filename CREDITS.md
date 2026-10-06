@@ -31,36 +31,42 @@ Downloaded image files live in `backend/static/visualizations/` and are
 gitignored — they rebuild from the manifest with
 `python -m scripts.visualization_images --apply`.
 
-## Ambient audio — **NOT YET SUPPLIED**
+## Ambient audio
 
-The ambient sound player is fully built and wired, but **the audio files are not
-in the repo**. The UI shows a "file not found" hint until they are added.
+All four loops were downloaded from [freesound.org](https://freesound.org) by
+the project author.
 
-To enable it, drop these files into `frontend/public/audio/`:
-
-| File | Suggested content | Requirements |
-|---|---|---|
-| `rain.mp3` | Steady rain, no thunder | seamless loop, mono or stereo, ~128 kbps, under ~1.5 MB |
-| `fireplace.mp3` | Crackling fire | seamless loop, same budget |
-| `cafe.mp3` | Low cafe murmur, no intelligible speech | seamless loop, same budget |
-
-Rules for choosing them:
-
-- **CC0 / public domain only** (or a licence that unambiguously permits
-  redistribution in this repo). Good sources: freesound.org filtered to CC0,
-  Pixabay, or any recording you made yourself.
-- Avoid anything with music, lyrics, or recognisable speech — it competes with
-  reading.
-- Loop cleanly: a click or gap at the seam is very noticeable at low volume.
-- **Record each file in the table below once added**, with the source URL,
-  author and licence.
-
-| File | Source URL | Author | Licence |
+| Served file | Source file | Size | Source |
 |---|---|---|---|
-| `rain.mp3` | _TODO_ | _TODO_ | _TODO_ |
-| `fireplace.mp3` | _TODO_ | _TODO_ | _TODO_ |
-| `cafe.mp3` | _TODO_ | _TODO_ | _TODO_ |
+| `rain.mp3` | `rain.wav` | 696 KB | freesound.org |
+| `fire.mp3` | `fire.wav` | 1.2 MB | freesound.org |
+| `ambient.mp3` | `ambient.wav` | 1.9 MB | freesound.org — `871734` by *zaamotek*, "mountain breathing" (acoustic guitar, dark ambient) |
+| `ambient2.mp3` | `ambient2.wav` | 1.4 MB | freesound.org |
 
-To add or rename sounds, edit `frontend/src/ambient.js` — the player, volume
-control, persistence and `ambient_sound_on/off` logging all pick them up
-automatically.
+Freesound hosts files under several different licences (CC0, CC-BY, CC-BY-NC,
+Sampling+). If any of the above turns out to be **CC-BY**, it needs the author
+credited here; CC0 needs nothing. Worth a one-minute check on the download pages
+before the project is submitted.
+
+Requirements for any ambient file added later:
+
+- Prefer **CC0**, or a licence that clearly permits redistribution in this repo.
+- Avoid intelligible speech — it competes directly with reading.
+
+### How the files are built
+
+Source `.wav` uploads are tens of megabytes and are **gitignored**; only the
+compressed `.mp3` loops are committed. Rebuild them with:
+
+```bash
+bash frontend/scripts/build_audio.sh    # needs ffmpeg
+```
+
+That script compresses to 96 kbps and crossfades the loop point by 1 s, so the
+clip does not click when it repeats. It turned a 16 MB WAV into a 696 KB MP3
+and a 28 MB WAV into 1.2 MB.
+
+To add or rename a sound: drop the `.wav` in, add it to the `SOURCES` list in
+`build_audio.sh`, run it, then add a row to `frontend/src/ambient.js` and to the
+table above. The player, volume control, persistence and `ambient_sound_on/off`
+logging pick it up automatically.

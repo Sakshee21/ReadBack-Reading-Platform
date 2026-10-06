@@ -12,6 +12,7 @@ import SessionDrawer from "../components/SessionDrawer";
 import ProgressRing from "../components/ProgressRing";
 import SettingsPanel from "../components/SettingsPanel";
 import CelebrationOverlay, { celebrationFor } from "../components/CelebrationOverlay";
+import Icon from "../components/Icon";
 import { useSettings } from "../SettingsContext";
 
 export default function Reader() {
@@ -37,6 +38,7 @@ export default function Reader() {
   const { plainTheme } = useSettings();
   const startedForMicroSession = useRef(null);
   const contentAreaRef = useRef(null);
+  const topbarRef = useRef(null);
   // Micro-session id the unstuck prompt has already been resolved for, so we
   // don't re-prompt in the same session after an accept or decline.
   const unstuckResolvedRef = useRef(null);
@@ -237,6 +239,26 @@ export default function Reader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [position?.micro_session?.id]);
 
+  // The RSVP control bar sticks *below* the topbar, whose height changes when
+  // the controls wrap on narrow screens - so publish the measured height as a
+  // CSS variable instead of hard-coding an offset.
+  useEffect(() => {
+    const el = topbarRef.current;
+    if (!el) return;
+    const publish = () =>
+      document.documentElement.style.setProperty(
+        "--reader-topbar-h",
+        `${Math.round(el.getBoundingClientRect().height)}px`
+      );
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      document.documentElement.style.removeProperty("--reader-topbar-h");
+    };
+  }, [position?.book?.id, bookFinished]);
+
   // Brief pop when the streak goes up.
   useEffect(() => {
     if (!streakBump) return;
@@ -384,7 +406,7 @@ export default function Reader() {
 
   return (
     <div className="reader-page">
-      <div className="reader-topbar">
+      <div className="reader-topbar" ref={topbarRef}>
         <div>
           <div className="book-title">{position.book.title}</div>
           <div className="chapter-label">{position.chapter_title || `Chapter ${position.chapter_index + 1}`}</div>
@@ -397,15 +419,19 @@ export default function Reader() {
             className={`icon-btn ${rsvpActive ? "active" : ""}`}
             onClick={() => setRsvpActive((a) => !a)}
           >
+            <Icon name="rsvp" />
             RSVP mode
           </button>
           <button className="icon-btn" onClick={() => setDrawerOpen(true)}>
+            <Icon name="sessions" />
             Sessions
           </button>
           <button className="icon-btn" onClick={() => setSettingsOpen(true)}>
+            <Icon name="settings" />
             Settings
           </button>
           <Link to="/library" className="icon-btn">
+            <Icon name="library" />
             Library
           </Link>
         </div>

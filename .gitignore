@@ -22,3 +22,7 @@ backend/static/visualizations/*
 !backend/static/visualizations/.gitkeep
 
 backend/tests/fixtures/books/
+
+# Ambient source audio: large uncompressed uploads. Only the built .mp3 loops
+# are committed - rebuild them with frontend/scripts/build_audio.sh
+frontend/public/audio/*.wav

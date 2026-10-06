@@ -136,6 +136,10 @@ button {
 }
 
 .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
   padding: 0.55rem 1rem;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -314,13 +318,22 @@ button {
 }
 
 .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
   border-radius: 6px;
   padding: 0.4rem 0.7rem;
   font-size: 0.85rem;
+  white-space: nowrap;
 }
+
+.ui-icon {
+  flex: 0 0 auto;
+}
+
 
 .icon-btn.active {
   background: var(--accent);
@@ -486,7 +499,9 @@ button {
 
 .rsvp-control-bar {
   position: sticky;
-  top: 0;
+  /* sit directly under the sticky topbar (+3px progress track) rather than
+     sliding beneath it, which hid the controls as soon as you scrolled */
+  top: calc(var(--reader-topbar-h, 56px) + 3px);
   z-index: 4;
   display: flex;
   align-items: center;

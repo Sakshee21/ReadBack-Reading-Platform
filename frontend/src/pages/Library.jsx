@@ -5,6 +5,7 @@ import { useAuth } from "../AuthContext";
 import StreakDisplay from "../components/StreakDisplay";
 import NudgeBanner from "../components/NudgeBanner";
 import SettingsPanel from "../components/SettingsPanel";
+import Icon from "../components/Icon";
 
 export default function Library() {
   const { logout } = useAuth();
@@ -52,9 +53,11 @@ export default function Library() {
         <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
           <StreakDisplay streak={streak} />
           <button className="btn-secondary" onClick={() => setSettingsOpen(true)}>
+            <Icon name="settings" />
             Settings
           </button>
           <button className="btn-secondary" onClick={logout}>
+            <Icon name="logout" />
             Log out
           </button>
         </div>
