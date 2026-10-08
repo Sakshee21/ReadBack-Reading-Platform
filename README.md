@@ -15,9 +15,13 @@ tooling and no social/accountability layer (out of scope for MVP).
 
 ## Prerequisites
 
-- Docker Desktop (for PostgreSQL)
-- Python 3.11+
+- Docker Desktop (for PostgreSQL) — **must be running**, and on Windows its
+  WSL integration must be enabled for your distro (Settings → Resources → WSL
+  Integration) or `docker` won't be found inside WSL
+- Python 3.10+
 - Node.js 18+
+- An internet connection for the first seed (books are downloaded from Project
+  Gutenberg, not stored in the repo)
 
 ## 1. Start the database
 
