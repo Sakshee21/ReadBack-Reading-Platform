@@ -38,11 +38,27 @@ class Book(Base):
     __tablename__ = "books"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    gutenberg_id: Mapped[int] = mapped_column(Integer, unique=True, index=True)
+    # Null for user uploads, which have no Gutenberg origin.
+    gutenberg_id: Mapped[int | None] = mapped_column(Integer, unique=True, index=True, nullable=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     author: Mapped[str] = mapped_column(String(255), nullable=False)
     full_text: Mapped[str] = mapped_column(Text, nullable=False)
     total_word_count: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Ownership. A null owner means a shared seeded book that everyone sees;
+    # anything else is private to that user. Enforced by deps.book_for_user,
+    # which 404s rather than 403s so ids can't be probed.
+    owner_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), index=True, nullable=True
+    )
+    is_user_uploaded: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    # seeded | gutenberg | upload - carried into the events CSV so uploaded
+    # books can be excluded from pilot analysis.
+    source_type: Mapped[str] = mapped_column(String(16), default="seeded", server_default="seeded")
+    # ready | processing | failed. Conversion runs in a background task, so an
+    # uploaded book exists before its chapters do.
+    status: Mapped[str] = mapped_column(String(16), default="ready", server_default="ready")
+    failure_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Decorative mood tint only - never scene imagery. Must be one of the
     # themes defined in frontend/src/styles/themes.css; tests check that every
     # theme keeps text contrast at WCAG AA.
@@ -72,6 +88,12 @@ class Chapter(Base):
     story_so_far: Mapped[str | None] = mapped_column(Text, nullable=True)
     recap_source: Mapped[str] = mapped_column(
         String(16), default="extractive", server_default="extractive"
+    )
+    # story | front_matter | back_matter. Non-story sections are kept so they
+    # can be inspected, but are excluded from the reading flow, progress and
+    # word counts. Seeded books are all 'story'.
+    section_kind: Mapped[str] = mapped_column(
+        String(16), default="story", server_default="story"
     )
 
     book: Mapped["Book"] = relationship(back_populates="chapters")

@@ -12,3 +12,7 @@ python-multipart==0.0.9
 httpx==0.27.2
 python-dotenv==1.0.1
 pytest==8.3.3
+# User book uploads: EPUB and text-based PDF extraction
+ebooklib==0.18
+beautifulsoup4==4.12.3
+pypdf==5.1.0

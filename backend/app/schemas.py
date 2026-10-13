@@ -33,15 +33,31 @@ class TokenOut(BaseModel):
 
 class BookOut(BaseModel):
     id: int
-    gutenberg_id: int
+    gutenberg_id: int | None = None
     title: str
     author: str
     total_word_count: int
     chapter_count: int
     theme: str = "parchment"
+    is_user_uploaded: bool = False
+    source_type: str = "seeded"
+    status: str = "ready"
+    failure_reason: str | None = None
 
     class Config:
         from_attributes = True
+
+
+class BookStatusOut(BaseModel):
+    """Polled by the frontend while a newly uploaded book is converting."""
+
+    id: int
+    status: str
+    failure_reason: str | None = None
+    title: str
+    chapter_count: int = 0
+    micro_session_count: int = 0
+    total_word_count: int = 0
 
 
 class MicroSessionOut(BaseModel):

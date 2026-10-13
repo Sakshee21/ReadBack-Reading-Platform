@@ -17,6 +17,23 @@ class Settings(BaseSettings):
     quiz_every_n_chapters: int = 1
     # Days away before the in-app "pick up where you left off" nudge appears.
     nudge_away_days: int = 3
+
+    # User book uploads. Uploads are private to the uploader and excluded from
+    # pilot analysis; these caps keep a single user from filling the database.
+    upload_max_bytes: int = 10 * 1024 * 1024
+    upload_max_words: int = 500_000
+    upload_min_words: int = 200
+    uploads_per_user: int = 5
+    # Story-flag policy for uploaded books. The scene-shift and every-3rd
+    # heuristics were tuned on five curated Gutenberg books and misfire on
+    # arbitrary uploads, so uploads get conservative cliffhangers and no
+    # visualization prompts. Flip either here to change it everywhere.
+    upload_conservative_cliffhangers: bool = True
+    # Visualization prompts are on for uploads but placed sparingly: only on
+    # story sections, never on a chapter's first or last session, and only
+    # every Nth session rather than at every cliffhanger.
+    upload_visualization_prompts: bool = True
+    upload_visualization_every: int = 5
     # Groq is used offline by scripts/generate_recaps.py only. The app never
     # calls an LLM at request time, so an empty key is fine at runtime.
     groq_api_key: str = ""

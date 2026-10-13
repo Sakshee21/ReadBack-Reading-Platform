@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.models import ReadingEvent, User
+from app.models import Book, ReadingEvent, User
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -17,6 +17,10 @@ EVENT_COLUMNS = [
     "user_id",
     "user_email",
     "book_id",
+    # Uploaded books are private and must be excluded from pilot analysis -
+    # filter on these two columns rather than trying to recognise titles.
+    "is_user_uploaded",
+    "source_type",
     "chapter_id",
     "micro_session_id",
     "event_type",
@@ -33,6 +37,10 @@ def export_events_csv(token: str = Query(...), db: Session = Depends(get_db)):
         raise HTTPException(status_code=403, detail="Invalid admin token")
 
     emails = dict(db.query(User.id, User.email).all())
+    book_meta = {
+        bid: (uploaded, source)
+        for bid, uploaded, source in db.query(Book.id, Book.is_user_uploaded, Book.source_type).all()
+    }
 
     buffer = io.StringIO()
     writer = csv.writer(buffer)
@@ -44,6 +52,8 @@ def export_events_csv(token: str = Query(...), db: Session = Depends(get_db)):
                 ev.user_id,
                 emails.get(ev.user_id, ""),
                 ev.book_id if ev.book_id is not None else "",
+                book_meta.get(ev.book_id, (False, ""))[0] if ev.book_id is not None else "",
+                book_meta.get(ev.book_id, (False, ""))[1] if ev.book_id is not None else "",
                 ev.chapter_id if ev.chapter_id is not None else "",
                 ev.micro_session_id if ev.micro_session_id is not None else "",
                 ev.event_type,

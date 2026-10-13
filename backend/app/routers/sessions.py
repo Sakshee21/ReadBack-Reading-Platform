@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.deps import get_current_user
+from app.deps import book_for_user, get_current_user
 from app.models import (
     Book,
     ComprehensionCheckpoint,
@@ -34,6 +34,8 @@ router = APIRouter(prefix="/sessions", tags=["sessions"])
 def start_session(
     payload: SessionStart, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):
+    # 404s if the book is someone else's upload, so a guessed id reveals nothing.
+    book_for_user(db, payload.book_id, user)
     micro_session = db.get(MicroSession, payload.micro_session_id)
     if not micro_session or micro_session.chapter.book_id != payload.book_id:
         raise HTTPException(status_code=404, detail="Micro-session not found for this book")

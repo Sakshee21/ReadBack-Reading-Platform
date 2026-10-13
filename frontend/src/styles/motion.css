@@ -130,8 +130,32 @@
   scroll-behavior: auto !important;
 }
 
-/* The celebration fades rather than animating when motion is reduced, so the
- * check mark is still drawn (just not stroked in). */
+/* Reduced motion must still CONFIRM the session, just without the movement.
+ *
+ * celebrate-in ends on opacity 0 because it fades itself out, so collapsing
+ * its duration above would snap the badge straight to invisible and the reader
+ * would get no feedback at all. Hold it visible instead and let the
+ * component's own 1.6s timer remove it. The check mark is shown already drawn
+ * rather than stroking itself in. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-reduce-motion="false"]) .celebration-badge {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+  :root:not([data-reduce-motion="false"]) .celebration-check path {
+    animation: none !important;
+    stroke-dashoffset: 0;
+  }
+}
+
+[data-reduce-motion="true"] .celebration-badge {
+  animation: none !important;
+  opacity: 1;
+  transform: none;
+}
+
 [data-reduce-motion="true"] .celebration-check path {
+  animation: none !important;
   stroke-dashoffset: 0;
 }

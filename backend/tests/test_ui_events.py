@@ -91,8 +91,10 @@ def test_csv_still_has_the_expected_columns(client):
     resp = client.get(f"/admin/export/events.csv?token={settings.admin_token}")
     header = next(csv.reader(io.StringIO(resp.text)))
     assert header == [
-        "id", "user_id", "user_email", "book_id", "chapter_id",
-        "micro_session_id", "event_type", "metadata", "created_at",
+        "id", "user_id", "user_email", "book_id",
+        # added so uploaded books can be excluded from pilot analysis
+        "is_user_uploaded", "source_type",
+        "chapter_id", "micro_session_id", "event_type", "metadata", "created_at",
     ]
 
 

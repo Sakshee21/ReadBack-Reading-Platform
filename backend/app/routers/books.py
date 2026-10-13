@@ -1,23 +1,26 @@
 import datetime as dt
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.database import get_db
-from app.deps import get_current_user
+from app.database import SessionLocal, get_db
+from app.deps import book_for_user, get_current_user
 from app.models import (
     Book,
     Chapter,
     CheckpointAttempt,
     ComprehensionCheckpoint,
     MicroSession,
+    ReadingEvent,
     ReadingSession,
     User,
     UserBookProgress,
 )
 from app.schemas import (
     BookOut,
+    BookStatusOut,
     CheckpointOut,
     ChapterOut,
     JumpRequest,
@@ -27,8 +30,16 @@ from app.schemas import (
     ReaderPositionOut,
 )
 from app.services.checkpoint import is_quiz_due
-from app.services.progression import build_block, ordered_micro_sessions, size_level_for
+from app.services.extract import ExtractionError, extract, safe_filename
+from app.services.ingest import persist_book_content, plan_chapters
+from app.services.progression import (
+    build_block,
+    ordered_micro_sessions,
+    size_level_for,
+    story_chapters,
+)
 from app.services.recap import choose_recap, needs_recap
+from app.services.segmentation import word_count
 
 router = APIRouter(prefix="/books", tags=["books"])
 
@@ -42,20 +53,30 @@ def _book_out(book: Book) -> BookOut:
         total_word_count=book.total_word_count,
         chapter_count=len(book.chapters),
         theme=book.theme or "parchment",
+        is_user_uploaded=book.is_user_uploaded,
+        source_type=book.source_type,
+        status=book.status,
+        failure_reason=book.failure_reason,
     )
 
 
 @router.get("", response_model=list[BookOut])
-def list_books(db: Session = Depends(get_db)):
-    books = db.query(Book).order_by(Book.title).all()
+def list_books(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """Shared seeded books plus this user's own uploads - never anyone else's."""
+    books = (
+        db.query(Book)
+        .filter(or_(Book.owner_user_id.is_(None), Book.owner_user_id == user.id))
+        .order_by(Book.title)
+        .all()
+    )
     return [_book_out(b) for b in books]
 
 
 @router.get("/{book_id}", response_model=list[ChapterOut])
-def get_book_chapters(book_id: int, db: Session = Depends(get_db)):
-    book = db.get(Book, book_id)
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
+def get_book_chapters(
+    book_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
+    book = book_for_user(db, book_id, user)
     return [
         ChapterOut(
             id=c.id,
@@ -64,7 +85,7 @@ def get_book_chapters(book_id: int, db: Session = Depends(get_db)):
             word_count=c.word_count,
             micro_session_count=len(c.micro_sessions),
         )
-        for c in book.chapters
+        for c in story_chapters(book)
     ]
 
 
@@ -77,7 +98,10 @@ def _get_or_create_progress(db: Session, user: User, book: Book) -> UserBookProg
     if progress:
         return progress
 
-    first_chapter = book.chapters[0] if book.chapters else None
+    # Start at the first *story* chapter, so an uploaded book doesn't open on
+    # its title page or contents list.
+    story = story_chapters(book)
+    first_chapter = story[0] if story else None
     first_micro = first_chapter.micro_sessions[0] if first_chapter and first_chapter.micro_sessions else None
     progress = UserBookProgress(
         user_id=user.id,
@@ -161,7 +185,7 @@ def _build_reader_position(
 
     words_read_so_far = sum(
         ms.word_count
-        for c in book.chapters
+        for c in story_chapters(book)
         for ms in c.micro_sessions
         if (c.index, ms.index) < (chapter.index, micro_session.index)
     )
@@ -184,9 +208,7 @@ def _build_reader_position(
 def get_reader_position(
     book_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):
-    book = db.get(Book, book_id)
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
+    book = book_for_user(db, book_id, user)
     if not book.chapters:
         raise HTTPException(status_code=422, detail="Book has no content")
 
@@ -205,9 +227,7 @@ def jump_to_micro_session(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    book = db.get(Book, book_id)
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
+    book = book_for_user(db, book_id, user)
 
     micro_session = db.get(MicroSession, payload.micro_session_id)
     if not micro_session or micro_session.chapter.book_id != book_id:
@@ -226,9 +246,7 @@ def jump_to_micro_session(
 def list_micro_sessions(
     book_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):
-    book = db.get(Book, book_id)
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
+    book = book_for_user(db, book_id, user)
 
     progress = (
         db.query(UserBookProgress)
@@ -276,9 +294,7 @@ def list_micro_sessions(
 
 @router.get("/{book_id}/progress", response_model=ProgressOut)
 def get_progress(book_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    book = db.get(Book, book_id)
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
+    book = book_for_user(db, book_id, user)
 
     progress = (
         db.query(UserBookProgress)
@@ -291,9 +307,210 @@ def get_progress(book_id: int, db: Session = Depends(get_db), user: User = Depen
     current = db.get(MicroSession, progress.current_micro_session_id)
     words_read = sum(
         ms.word_count
-        for c in book.chapters
+        for c in story_chapters(book)
         for ms in c.micro_sessions
         if (c.index, ms.index) < (current.chapter.index, current.index)
     )
     pct = round(100 * words_read / book.total_word_count, 2) if book.total_word_count else 0.0
     return ProgressOut(book_id=book.id, words_read=words_read, total_words=book.total_word_count, progress_pct=pct)
+
+
+# --------------------------------------------------------------------------
+# User uploads
+#
+# Uploaded books are private to the uploader and flagged so they can be kept
+# out of pilot analysis. Conversion happens in a background task because
+# segmenting a full novel takes a few seconds; the client polls /status.
+# --------------------------------------------------------------------------
+
+
+async def _read_capped(upload: UploadFile, limit: int) -> bytes:
+    """Read the upload, refusing anything over the limit without buffering it all."""
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await upload.read(64 * 1024)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > limit:
+            raise HTTPException(
+                status_code=413,
+                detail=f"That file is larger than {limit // (1024 * 1024)} MB.",
+            )
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
+def _convert_upload(book_id: int, filename: str, data: bytes) -> None:
+    """Background conversion. Never raises - failures are recorded on the row."""
+    db = SessionLocal()
+    try:
+        book = db.get(Book, book_id)
+        if book is None:
+            return
+        try:
+            text, source_chapters, _fmt = extract(filename, data)
+            words = word_count(text)
+            if words < settings.upload_min_words:
+                raise ExtractionError(
+                    f"That file only has {words} words - too short to segment into "
+                    "reading sessions.",
+                    "too_short",
+                )
+            if words > settings.upload_max_words:
+                raise ExtractionError(
+                    f"That book is {words:,} words, over the {settings.upload_max_words:,} "
+                    "word limit.",
+                    "too_long",
+                )
+
+            chapters = plan_chapters(text, source_chapters)
+            book.full_text = text
+            _, sessions, story_words = persist_book_content(db, book, chapters)
+            if sessions == 0:
+                raise ExtractionError(
+                    "No story content was found - the file looks like front matter only.",
+                    "no_story_content",
+                )
+            # Progress and pace are measured against the story, not the title
+            # page and licence.
+            book.total_word_count = story_words
+            book.status = "ready"
+            book.failure_reason = None
+            db.commit()
+        except ExtractionError as exc:
+            db.rollback()
+            book = db.get(Book, book_id)
+            if book:
+                book.status = "failed"
+                book.failure_reason = exc.message
+                db.commit()
+        except Exception:  # noqa: BLE001 - never leave a book stuck "processing"
+            db.rollback()
+            book = db.get(Book, book_id)
+            if book:
+                book.status = "failed"
+                book.failure_reason = "Conversion failed unexpectedly."
+                db.commit()
+    finally:
+        db.close()
+
+
+@router.post("/upload", response_model=BookStatusOut, status_code=202)
+async def upload_book(
+    background: BackgroundTasks,
+    file: UploadFile = File(...),
+    title: str | None = Form(None),
+    author: str | None = Form(None),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    owned = (
+        db.query(Book)
+        .filter(Book.owner_user_id == user.id, Book.status != "failed")
+        .count()
+    )
+    if owned >= settings.uploads_per_user:
+        raise HTTPException(
+            status_code=409,
+            detail=f"You can upload up to {settings.uploads_per_user} books. "
+            "Delete one to make room.",
+        )
+
+    name = safe_filename(file.filename or "upload")
+    data = await _read_capped(file, settings.upload_max_bytes)
+    if not data:
+        raise HTTPException(status_code=400, detail="That file is empty.")
+
+    # Fail fast on format problems so the user gets an error now rather than a
+    # failed row thirty seconds later.
+    try:
+        from app.services.extract import sniff_format
+
+        sniff_format(name, data)
+    except ExtractionError as exc:
+        raise HTTPException(status_code=400, detail=exc.message) from exc
+
+    fallback_title = name.rsplit(".", 1)[0].replace("_", " ").strip() or "Untitled"
+    book = Book(
+        gutenberg_id=None,
+        title=(title or fallback_title)[:500],
+        author=(author or "Unknown")[:255],
+        full_text="",
+        total_word_count=0,
+        owner_user_id=user.id,
+        is_user_uploaded=True,
+        source_type="upload",
+        status="processing",
+    )
+    db.add(book)
+    db.commit()
+    db.refresh(book)
+
+    background.add_task(_convert_upload, book.id, name, data)
+
+    return BookStatusOut(id=book.id, status=book.status, title=book.title)
+
+
+@router.get("/{book_id}/status", response_model=BookStatusOut)
+def upload_status(
+    book_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
+    book = book_for_user(db, book_id, user)
+    return BookStatusOut(
+        id=book.id,
+        status=book.status,
+        failure_reason=book.failure_reason,
+        title=book.title,
+        chapter_count=len(book.chapters),
+        micro_session_count=sum(len(c.micro_sessions) for c in book.chapters),
+        total_word_count=book.total_word_count,
+    )
+
+
+@router.delete("/{book_id}", status_code=204)
+def delete_uploaded_book(
+    book_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
+    """Delete an uploaded book and everything hanging off it. Seeded books are
+    shared content and can never be deleted through the API."""
+    book = book_for_user(db, book_id, user)
+    if not book.is_user_uploaded or book.owner_user_id != user.id:
+        raise HTTPException(status_code=403, detail="Only your own uploads can be deleted.")
+
+    chapter_ids = [c.id for c in book.chapters]
+    micro_ids = [ms.id for c in book.chapters for ms in c.micro_sessions]
+
+    # Children that hold foreign keys into this book must go first; chapters and
+    # micro-sessions themselves cascade from the Book relationship.
+    event_filter = [ReadingEvent.book_id == book.id]
+    if chapter_ids:
+        event_filter.append(ReadingEvent.chapter_id.in_(chapter_ids))
+    if micro_ids:
+        event_filter.append(ReadingEvent.micro_session_id.in_(micro_ids))
+    db.query(ReadingEvent).filter(or_(*event_filter)).delete(synchronize_session=False)
+
+    db.query(ReadingSession).filter(ReadingSession.book_id == book.id).delete(
+        synchronize_session=False
+    )
+    db.query(UserBookProgress).filter(UserBookProgress.book_id == book.id).delete(
+        synchronize_session=False
+    )
+    checkpoint_ids = [
+        c.id
+        for c in db.query(ComprehensionCheckpoint)
+        .filter(ComprehensionCheckpoint.book_id == book.id)
+        .all()
+    ]
+    if checkpoint_ids:
+        db.query(CheckpointAttempt).filter(
+            CheckpointAttempt.checkpoint_id.in_(checkpoint_ids)
+        ).delete(synchronize_session=False)
+        db.query(ComprehensionCheckpoint).filter(
+            ComprehensionCheckpoint.book_id == book.id
+        ).delete(synchronize_session=False)
+
+    db.delete(book)
+    db.commit()
+    return None

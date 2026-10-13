@@ -2,10 +2,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.deps import get_current_user
+from app.deps import book_for_user, get_current_user
 from app.models import Book, MicroSession, ReadingEvent, User, UserBookProgress
 from app.schemas import PaceOut
 from app.services.pace import DEFAULT_WPM, minutes_for, summarize
+from app.services.progression import story_chapters
 
 router = APIRouter(prefix="/pace", tags=["pace"])
 
@@ -30,9 +31,8 @@ def my_pace(book_id: int | None = None, db: Session = Depends(get_db),
     effective_wpm = pace["wpm_average"] or DEFAULT_WPM
     words_left = None
     if book_id is not None:
-        book = db.get(Book, book_id)
-        if book:
-            words_left = _words_remaining(db, user, book)
+        book = book_for_user(db, book_id, user)
+        words_left = _words_remaining(db, user, book)
 
     return PaceOut(
         **pace,
@@ -56,7 +56,7 @@ def _words_remaining(db: Session, user: User, book: Book) -> int:
 
     read = sum(
         ms.word_count
-        for c in book.chapters
+        for c in story_chapters(book)
         for ms in c.micro_sessions
         if (c.index, ms.index) < (current.chapter.index, current.index)
     )

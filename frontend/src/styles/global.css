@@ -800,6 +800,136 @@ button {
   color: var(--accent);
 }
 
+/* ---------- Book uploads ---------- */
+
+.book-card-wrap { position: relative; display: flex; }
+.book-card-wrap > .book-card { flex: 1; }
+
+.book-card.is-unavailable {
+  opacity: 0.75;
+  cursor: default;
+}
+
+.upload-badge {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.book-state {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  margin-top: 0.6rem;
+  line-height: 1.4;
+}
+
+.book-state.processing { color: var(--text-muted); }
+.book-state.failed { color: var(--danger); }
+
+.book-delete {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  border-radius: 5px;
+  padding: 0.18rem 0.45rem;
+}
+
+.book-delete:hover { color: var(--danger); border-color: var(--danger); }
+
+.upload-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  width: min(520px, 94vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  font-family: var(--sans);
+}
+
+.upload-body { padding: 1rem 1.25rem 1.4rem; }
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: center;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 1.6rem 1rem;
+  cursor: pointer;
+  background: var(--bg);
+}
+
+.dropzone.dragging,
+.dropzone:hover { border-color: var(--accent); }
+.dropzone.has-file { border-style: solid; border-color: var(--accent); }
+
+.dropzone-hint {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.upload-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.9rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.upload-field input {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+}
+
+.upload-status {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.progress-bar.indeterminate .fill {
+  animation: upload-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes upload-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+.upload-notice {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  border-left: 2px solid var(--border);
+  padding-left: 0.7rem;
+  margin: 1.1rem 0 0.9rem;
+}
+
 /* ---------- Progress ring ---------- */
 
 .progress-ring {
@@ -1067,6 +1197,16 @@ button {
   overflow-y: auto;
   box-shadow: var(--shadow);
   font-family: var(--serif);
+}
+
+/* Inside the burst modal the control bar must not stick: it's positioned
+   against the reader's topbar, which isn't there, so it floats over the very
+   paragraph the burst is streaming. The burst is one short paragraph, so the
+   bar has nothing to stick for. */
+.burst-card .rsvp-control-bar {
+  position: static;
+  top: auto;
+  margin-bottom: 1.1rem;
 }
 
 .burst-card .burst-label {

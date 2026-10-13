@@ -18,10 +18,24 @@ def size_level_for(completed_count: int) -> int:
     return 1
 
 
+def story_chapters(book) -> list:
+    """Chapters that are actually the book, in order.
+
+    Front matter (title page, contents, preface) and back matter (appendices,
+    colophon) are stored but never read, so every reading-flow calculation -
+    position, progress, word counts - goes through here.
+    """
+    return [
+        c
+        for c in sorted(book.chapters, key=lambda c: c.index)
+        if getattr(c, "section_kind", "story") == "story"
+    ]
+
+
 def ordered_micro_sessions(book) -> list:
-    """Every micro-session of a book in reading order (chapter, then index)."""
+    """Every readable micro-session of a book in reading order."""
     result = []
-    for chapter in sorted(book.chapters, key=lambda c: c.index):
+    for chapter in story_chapters(book):
         for ms in sorted(chapter.micro_sessions, key=lambda m: m.index):
             result.append(ms)
     return result

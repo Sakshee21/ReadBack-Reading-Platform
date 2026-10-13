@@ -72,7 +72,46 @@ export const api = {
   getStreak: () => request("/streaks/me"),
   getPace: (bookId) => request(`/pace/me${bookId ? `?book_id=${bookId}` : ""}`),
   getNudge: () => request("/nudge/me"),
+
+  getBookStatus: (bookId) => request(`/books/${bookId}/status`),
+  deleteBook: (bookId) => request(`/books/${bookId}`, { method: "DELETE" }),
 };
+
+/**
+ * Upload a book file. Uses XMLHttpRequest rather than fetch because only XHR
+ * reports upload progress, and a 12MB EPUB over a slow connection needs a
+ * progress bar. Returns the created book's {id, status, title}.
+ */
+export function uploadBook({ file, title, author, onProgress }) {
+  return new Promise((resolve, reject) => {
+    const form = new FormData();
+    form.append("file", file);
+    if (title) form.append("title", title);
+    if (author) form.append("author", author);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}/books/upload`);
+    const token = getToken();
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total);
+    };
+
+    xhr.onload = () => {
+      let body = {};
+      try {
+        body = JSON.parse(xhr.responseText || "{}");
+      } catch {
+        // non-JSON error body
+      }
+      if (xhr.status >= 200 && xhr.status < 300) resolve(body);
+      else reject(new ApiError(body.detail || `Upload failed (${xhr.status})`, xhr.status));
+    };
+    xhr.onerror = () => reject(new ApiError("Network error during upload", 0));
+    xhr.send(form);
+  });
+}
 
 /**
  * Fire-and-forget instrumentation for the pilot. Known id fields are pulled

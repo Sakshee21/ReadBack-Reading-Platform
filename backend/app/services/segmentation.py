@@ -310,10 +310,20 @@ def _split_oversized_paragraph(paragraph: str, max_words: int) -> list[str]:
     return chunks
 
 
+# A session that ends on a question, an exclamation, or cut-off speech is a
+# genuine hook. Used only when conservative_cliffhangers is on (uploads), where
+# the scene-shift heuristic fires far too readily on arbitrary books.
+TENSION_END_RE = re.compile(r"""[?!]["'”’)\]]*\s*$|(—|--|\.\.\.|…)["”]?\s*$""")
+
+
 def split_into_micro_sessions(
     chapter_text: str,
     min_words: int = 400,
     max_words: int = 600,
+    conservative_cliffhangers: bool = False,
+    visualization_prompts: bool = True,
+    visualization_every: int = 3,
+    visualization_skip_edges: bool = False,
 ) -> list[dict]:
     """Greedily pack paragraphs into ~400-600 word chunks, breaking at paragraph
     boundaries. The last chunk of a chapter is always flagged as a cliffhanger
@@ -372,11 +382,31 @@ def split_into_micro_sessions(
     if sessions:
         sessions[-1]["is_cliffhanger_break"] = True
 
+    if conservative_cliffhangers:
+        # Only keep a break where the text itself ends on a hook, plus the
+        # chapter end. Everything else becomes a plain paragraph boundary.
+        for idx, session in enumerate(sessions):
+            is_last = idx == len(sessions) - 1
+            session["is_cliffhanger_break"] = bool(
+                is_last or TENSION_END_RE.search(session["text"].rstrip())
+            )
+
     # Sprinkle a visualization checkpoint at every scene-shift boundary and
-    # roughly every 3rd micro-session as a fallback so long chapters get some.
-    for idx, session in enumerate(sessions):
-        if session["is_cliffhanger_break"] or (idx > 0 and idx % 3 == 0):
-            session["has_visualization_prompt"] = True
+    # roughly every Nth micro-session as a fallback so long chapters get some.
+    if visualization_prompts:
+        last = len(sessions) - 1
+        for idx, session in enumerate(sessions):
+            if visualization_skip_edges:
+                # Sparing placement for uploads: never on the first or last
+                # session of a chapter, and on a fixed interval rather than at
+                # every cliffhanger.
+                if idx == 0 or idx == last:
+                    continue
+                if idx % visualization_every != 0:
+                    continue
+                session["has_visualization_prompt"] = True
+            elif session["is_cliffhanger_break"] or (idx > 0 and idx % visualization_every == 0):
+                session["has_visualization_prompt"] = True
 
     for idx, session in enumerate(sessions):
         session["index"] = idx
