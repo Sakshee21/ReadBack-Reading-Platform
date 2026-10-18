@@ -1,5 +1,5 @@
 import { luminance, parseHex } from "./colors";
-import { DEFAULT_PALETTE, SCHEME_IDS, VAR_MAP, schemePalette } from "./schemes";
+import { DEFAULT_PALETTE, SCHEME_IDS, VAR_MAP, checkPalette, schemePalette } from "./schemes";
 
 export const STORAGE_KEY = "readback_settings";
 
@@ -14,9 +14,13 @@ export function normalizePalette(raw) {
 
 export function normalizeAppearance(raw) {
   const src = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  let customPalette = normalizePalette(src.customPalette);
+  // The panel never stores an unreadable palette, so one in storage was edited
+  // by hand or is corrupt; applying it before first paint could lock the reader out.
+  if (checkPalette(customPalette).level === "refuse") customPalette = { ...DEFAULT_PALETTE };
   return {
     scheme: SCHEME_IDS.includes(src.scheme) ? src.scheme : "auto",
-    customPalette: normalizePalette(src.customPalette),
+    customPalette,
   };
 }
 

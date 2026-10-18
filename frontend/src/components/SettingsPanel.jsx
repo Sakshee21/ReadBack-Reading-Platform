@@ -40,6 +40,11 @@ export default function SettingsPanel({ open, onClose, bookId = null }) {
 
   // The pickers show what the reader chose even when a value was refused.
   const [draft, setDraft] = useState(customPalette);
+  // Show what is really applied whenever the panel opens or the theme changes,
+  // not a refused colour left over from an earlier edit.
+  useEffect(() => {
+    setDraft(customPalette);
+  }, [open, scheme, customPalette]);
   const logTimer = useRef(null);
   const pendingLog = useRef(null);
 
@@ -133,15 +138,16 @@ export default function SettingsPanel({ open, onClose, bookId = null }) {
                 </label>
               ))}
               <p role="status" className={`appearance-status appearance-${check.level}`}>
-                {check.message}. Text on {check.worst.pair} {check.worst.ratio.toFixed(1)} to 1.
+                {check.message}
+              </p>
+              <p className="appearance-ratio">
+                Text on {check.worst.pair} {check.worst.ratio.toFixed(1)} to 1
               </p>
             </div>
           )}
-          {scheme !== "auto" && (
-            <button type="button" className="btn-secondary" onClick={reset}>
-              Reset appearance
-            </button>
-          )}
+          <button type="button" className="btn-secondary" onClick={reset}>
+            Reset appearance
+          </button>
 
           <hr className="settings-divider" />
 
@@ -170,12 +176,13 @@ export default function SettingsPanel({ open, onClose, bookId = null }) {
               type="checkbox"
               checked={plainTheme}
               disabled={scheme !== "auto"}
+              aria-describedby="plain-theme-hint"
               onChange={(e) => setPlainTheme(e.target.checked)}
             />
             <span>Plain theme</span>
           </label>
-          <p className="settings-hint">
-            Ignores each book's background tint and uses the default palette.
+          <p className="settings-hint" id="plain-theme-hint">
+            Ignores each book's background tint and uses the default palette. Only used with Automatic.
           </p>
 
           <label className="settings-row">

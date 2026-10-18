@@ -84,4 +84,24 @@ describe("SettingsContext appearance", () => {
       Storage.prototype.setItem = origSet;
     }
   });
+
+  it("another_tab_changing_the_theme_updates_this_one", () => {
+    const { result } = renderHook(() => useSettings(), { wrapper });
+    expect(result.current.scheme).toBe("auto");
+    act(() => {
+      localStorage.setItem("readback_settings", JSON.stringify({ scheme: "dark" }));
+      window.dispatchEvent(new StorageEvent("storage", { key: "readback_settings" }));
+    });
+    expect(result.current.scheme).toBe("dark");
+    expect(root.style.getPropertyValue("--bg")).toBe(SCHEMES.dark.bg);
+  });
+
+  it("storage_events_for_other_keys_are_ignored", () => {
+    const { result } = renderHook(() => useSettings(), { wrapper });
+    act(() => {
+      localStorage.setItem("readback_settings", JSON.stringify({ scheme: "dark" }));
+      window.dispatchEvent(new StorageEvent("storage", { key: "something_else" }));
+    });
+    expect(result.current.scheme).toBe("auto");
+  });
 });

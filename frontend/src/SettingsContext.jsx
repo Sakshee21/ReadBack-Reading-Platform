@@ -69,6 +69,15 @@ export function SettingsProvider({ children }) {
     document.documentElement.dataset.reduceMotion = reduceMotion ? "true" : "false";
   }, [reduceMotion]);
 
+  // Another tab changed the settings: follow it, so two tabs never fight over the look.
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === STORAGE_KEY) setSettings(readStored());
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   const update = useCallback((patch) => setSettings((s) => ({ ...s, ...patch })), []);
 
   const value = useMemo(

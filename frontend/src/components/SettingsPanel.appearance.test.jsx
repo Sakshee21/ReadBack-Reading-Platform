@@ -138,7 +138,7 @@ describe("Settings panel appearance", () => {
     setColor("Background", "#000000");
     setColor("Cards", "#ffffff");
     setColor("Text", "#ffffff");
-    expect(screen.getByRole("status").textContent).toMatch(/text on cards 1\.0 to 1/i);
+    expect(screen.getByText(/text on cards 1.0 to 1/i)).toBeTruthy();
   });
 
   it("reset_returns_to_automatic", () => {
@@ -163,5 +163,47 @@ describe("Settings panel appearance", () => {
   it("hint_text_is_present", () => {
     setup();
     expect(screen.getByText(/turns off each book's colours/i)).toBeTruthy();
+  });
+
+  it("reset_is_available_in_automatic_too", () => {
+    localStorage.setItem(
+      "readback_settings",
+      JSON.stringify({ scheme: "auto", customPalette: { bg: "#000000", surface: "#000000", text: "#ffffff", accent: "#ff0000" } })
+    );
+    setup();
+    fireEvent.click(screen.getByRole("button", { name: "Reset appearance" }));
+    expect(JSON.parse(localStorage.getItem("readback_settings")).customPalette.bg).toBe("#f7f3ea");
+  });
+
+  it("the_pickers_show_the_applied_palette_after_a_refused_edit_and_a_scheme_switch", () => {
+    setup();
+    pick("Custom");
+    setColor("Text", "#000000");
+    setColor("Text", "#f7f3ea"); // refused
+    expect(screen.getByLabelText("Text").value).toBe("#f7f3ea");
+    pick("Light");
+    pick("Custom");
+    expect(screen.getByLabelText("Text").value).toBe("#000000");
+  });
+
+  it("the_live_region_announces_only_the_message_not_the_changing_ratio", () => {
+    setup();
+    pick("Custom");
+    const status = screen.getByRole("status");
+    expect(status.textContent).not.toMatch(/to 1/);
+    expect(screen.getByText(/Text on background [0-9]+.[0-9] to 1/)).toBeTruthy();
+  });
+
+  it("plain_theme_explains_why_it_can_be_disabled", () => {
+    setup();
+    expect(screen.getByText(/only used with automatic/i)).toBeTruthy();
+    expect(screen.getByRole("checkbox", { name: "Plain theme" }).getAttribute("aria-describedby")).toBeTruthy();
+  });
+
+  it("a_refused_colour_never_reaches_storage", () => {
+    setup();
+    pick("Custom");
+    setColor("Text", "#f7f3ea");
+    expect(JSON.parse(localStorage.getItem("readback_settings")).customPalette.text).not.toBe("#f7f3ea");
   });
 });

@@ -38,13 +38,19 @@
 }
 .appearance-picker input[type="color"]:focus-visible,
 .appearance-option input:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--text);
   outline-offset: 2px;
 }
 .appearance-status {
   grid-column: 1 / -1;
   margin: 0;
   font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.appearance-ratio {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.85rem;
   color: var(--text-muted);
 }
 .appearance-warn,

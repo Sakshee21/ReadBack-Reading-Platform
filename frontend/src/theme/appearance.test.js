@@ -22,10 +22,25 @@ describe("normalizeAppearance", () => {
     }
   });
   it("accepts_good_values_and_short_hex", () => {
-    const r = normalizeAppearance({ scheme: "dark", customPalette: { ...custom, bg: "#ABC" } });
+    const r = normalizeAppearance({ scheme: "dark", customPalette: { ...custom, bg: "#123" } });
     expect(r.scheme).toBe("dark");
-    expect(r.customPalette.bg).toBe("#aabbcc");
+    expect(r.customPalette.bg).toBe("#112233");
     expect(r.customPalette.accent).toBe("#ffaa00");
+  });
+});
+
+describe("stored lock-out palettes", () => {
+  it("a_stored_palette_with_unreadable_text_is_replaced_by_the_default", () => {
+    const r = normalizeAppearance({
+      scheme: "custom",
+      customPalette: { bg: "#336699", surface: "#336699", text: "#336699", accent: "#ffaa00" },
+    });
+    expect(r.customPalette).toEqual(DEFAULT_PALETTE);
+    expect(r.scheme).toBe("custom");
+  });
+  it("a_stored_low_contrast_but_usable_palette_is_kept", () => {
+    const keep = { bg: "#ffffff", surface: "#ffffff", text: "#8a8a8a", accent: "#000000" };
+    expect(normalizeAppearance({ scheme: "custom", customPalette: keep }).customPalette).toEqual(keep);
   });
 });
 
