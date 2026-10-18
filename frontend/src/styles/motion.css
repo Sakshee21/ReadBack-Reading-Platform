@@ -17,7 +17,7 @@
 
 /* ---------- new text / new session ---------- */
 
-.fade-in-text > p {
+.fade-in-text .hl-text > p {
   animation: fade-rise var(--motion-base) var(--motion-ease) both;
 }
 

@@ -55,7 +55,9 @@ export const api = {
 
   listBooks: () => request("/books"),
   getChapters: (bookId) => request(`/books/${bookId}`),
-  getReaderPosition: (bookId) => request(`/books/${bookId}/reader`),
+  // With microSessionId this is a read-only peek that leaves the saved position alone.
+  getReaderPosition: (bookId, microSessionId) =>
+    request(`/books/${bookId}/reader${microSessionId ? `?ms=${microSessionId}` : ""}`),
   getProgress: (bookId) => request(`/books/${bookId}/progress`),
   listMicroSessions: (bookId) => request(`/books/${bookId}/micro-sessions`),
   jumpToMicroSession: (bookId, microSessionId) =>
@@ -75,6 +77,14 @@ export const api = {
 
   getBookStatus: (bookId) => request(`/books/${bookId}/status`),
   deleteBook: (bookId) => request(`/books/${bookId}`, { method: "DELETE" }),
+
+  createHighlight: (bookId, body) => request(`/books/${bookId}/highlights`, { method: "POST", body }),
+  listHighlights: (bookId, microSessionId) =>
+    request(
+      `/books/${bookId}/highlights${microSessionId ? `?micro_session_id=${microSessionId}` : ""}`
+    ),
+  updateHighlight: (id, body) => request(`/highlights/${id}`, { method: "PATCH", body }),
+  deleteHighlight: (id) => request(`/highlights/${id}`, { method: "DELETE" }),
 };
 
 /**

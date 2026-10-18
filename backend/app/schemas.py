@@ -1,7 +1,7 @@
 import datetime as dt
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 
 class UserCreate(BaseModel):
@@ -60,6 +60,14 @@ class BookStatusOut(BaseModel):
     total_word_count: int = 0
 
 
+class MicroSessionPart(BaseModel):
+    """One micro-session inside a served block. Highlights attach to these,
+    not to the merged block, so each keeps its own text offsets."""
+
+    id: int
+    text: str
+
+
 class MicroSessionOut(BaseModel):
     id: int
     index: int
@@ -67,6 +75,7 @@ class MicroSessionOut(BaseModel):
     word_count: int
     is_cliffhanger_break: bool
     has_visualization_prompt: bool
+    parts: list[MicroSessionPart] = []
 
     class Config:
         from_attributes = True
@@ -205,3 +214,68 @@ class EventIn(BaseModel):
 
 ReaderPositionOut.model_rebuild()
 NextSessionOut.model_rebuild()
+
+
+# --- Highlights ---------------------------------------------------------------
+
+HighlightColor = Literal["yellow", "green", "blue", "pink", "orange", "purple"]
+MAX_HIGHLIGHT_CHARS = 2000
+MAX_HIGHLIGHT_COMMENT = 2000
+
+
+class HighlightIn(BaseModel):
+    micro_session_id: int
+    start: int = Field(ge=0)
+    end: int = Field(ge=1)
+    color: HighlightColor
+    comment: str | None = Field(default=None, max_length=MAX_HIGHLIGHT_COMMENT)
+
+    @field_validator("comment")
+    @classmethod
+    def _blank_comment_is_none(cls, value):
+        return (value.strip() or None) if value is not None else None
+
+    @model_validator(mode="after")
+    def _range_is_sane(self):
+        if self.end <= self.start:
+            raise ValueError("end must be after start")
+        if self.end - self.start > MAX_HIGHLIGHT_CHARS:
+            raise ValueError(f"a highlight can be at most {MAX_HIGHLIGHT_CHARS} characters")
+        return self
+
+
+class HighlightPatch(BaseModel):
+    color: HighlightColor | None = None
+    comment: str | None = Field(default=None, max_length=MAX_HIGHLIGHT_COMMENT)
+
+    @field_validator("comment")
+    @classmethod
+    def _blank_comment_is_none(cls, value):
+        return (value.strip() or None) if value is not None else None
+
+    @model_validator(mode="after")
+    def _colour_cannot_be_cleared(self):
+        if "color" in self.model_fields_set and self.color is None:
+            raise ValueError("color cannot be null")
+        return self
+
+
+class HighlightOut(BaseModel):
+    id: int
+    book_id: int
+    micro_session_id: int
+    chapter_index: int
+    chapter_title: str
+    session_index: int
+    # The reader-facing "Session N", the same numbering as the Sessions drawer;
+    # null only for a passage outside the readable story (front/back matter).
+    session_number: int | None
+    start: int
+    end: int
+    quote: str
+    context_before: str
+    context_after: str
+    color: str
+    comment: str | None
+    created_at: dt.datetime
+    updated_at: dt.datetime

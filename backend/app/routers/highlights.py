@@ -1,0 +1,162 @@
+from fastapi import APIRouter, Depends, HTTPException, Response
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.deps import book_for_user, get_current_user
+from app.models import Book, Chapter, Highlight, MicroSession, User
+from app.schemas import HighlightIn, HighlightOut, HighlightPatch
+
+router = APIRouter(tags=["highlights"])
+
+CONTEXT_CHARS = 40
+
+
+def _session_numbers(db: Session, book: Book) -> dict[int, int]:
+    """micro-session id -> "Session N", numbered as the Sessions drawer does
+    (story chapters only, in reading order). One query, not a walk of the
+    whole book."""
+    rows = (
+        db.query(MicroSession.id)
+        .join(Chapter, MicroSession.chapter_id == Chapter.id)
+        .filter(Chapter.book_id == book.id, Chapter.section_kind == "story")
+        .order_by(Chapter.index, MicroSession.index)
+        .all()
+    )
+    return {row[0]: n for n, row in enumerate(rows, start=1)}
+
+
+def _out(h: Highlight, chapter: Chapter, ms: MicroSession, numbers: dict[int, int]) -> HighlightOut:
+    return HighlightOut(
+        id=h.id,
+        book_id=h.book_id,
+        micro_session_id=h.micro_session_id,
+        chapter_index=chapter.index,
+        chapter_title=chapter.title,
+        session_index=ms.index,
+        session_number=numbers.get(ms.id),
+        start=h.start,
+        end=h.end,
+        quote=h.quote,
+        context_before=h.context_before,
+        context_after=h.context_after,
+        color=h.color,
+        comment=h.comment,
+        created_at=h.created_at,
+        updated_at=h.updated_at,
+    )
+
+
+def _owned(db: Session, highlight_id: int, user: User) -> Highlight:
+    row = db.get(Highlight, highlight_id)
+    if row is None or row.user_id != user.id:
+        raise HTTPException(status_code=404, detail="Highlight not found")
+    return row
+
+
+@router.post("/books/{book_id}/highlights", response_model=HighlightOut, status_code=201)
+def create_highlight(
+    book_id: int,
+    payload: HighlightIn,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    book = book_for_user(db, book_id, user)
+    ms = db.get(MicroSession, payload.micro_session_id)
+    chapter = db.get(Chapter, ms.chapter_id) if ms else None
+    if ms is None or chapter is None or chapter.book_id != book.id:
+        raise HTTPException(status_code=422, detail="That passage is not in this book.")
+    # Python string indexes are Unicode code points, which is what the client
+    # sends, so the quote is cut exactly where the reader selected.
+    if payload.end > len(ms.text):
+        raise HTTPException(status_code=422, detail="Selection is outside the passage.")
+
+    if not ms.text[payload.start : payload.end].strip():
+        raise HTTPException(status_code=422, detail="Select some text, not just spaces.")
+
+    # Serialise creates for one reader and passage, so two tabs cannot both
+    # pass the overlap check below.
+    db.execute(
+        text("SELECT pg_advisory_xact_lock(:user_id, :ms_id)"),
+        {"user_id": user.id, "ms_id": ms.id},
+    )
+    clash = (
+        db.query(Highlight.id)
+        .filter(
+            Highlight.user_id == user.id,
+            Highlight.micro_session_id == ms.id,
+            Highlight.start < payload.end,
+            payload.start < Highlight.end,
+        )
+        .first()
+    )
+    if clash:
+        raise HTTPException(status_code=409, detail="That overlaps an existing highlight.")
+
+    row = Highlight(
+        user_id=user.id,
+        book_id=book.id,
+        micro_session_id=ms.id,
+        start=payload.start,
+        end=payload.end,
+        quote=ms.text[payload.start : payload.end],
+        context_before=ms.text[max(0, payload.start - CONTEXT_CHARS) : payload.start],
+        context_after=ms.text[payload.end : payload.end + CONTEXT_CHARS],
+        color=payload.color,
+        comment=payload.comment,
+    )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return _out(row, chapter, ms, _session_numbers(db, book))
+
+
+@router.get("/books/{book_id}/highlights", response_model=list[HighlightOut])
+def list_highlights(
+    book_id: int,
+    micro_session_id: int | None = None,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    book = book_for_user(db, book_id, user)
+    query = (
+        db.query(Highlight, Chapter, MicroSession)
+        .join(MicroSession, Highlight.micro_session_id == MicroSession.id)
+        .join(Chapter, MicroSession.chapter_id == Chapter.id)
+        .filter(Highlight.user_id == user.id, Highlight.book_id == book.id)
+    )
+    if micro_session_id is not None:
+        query = query.filter(Highlight.micro_session_id == micro_session_id)
+    rows = query.order_by(Chapter.index, MicroSession.index, Highlight.start).all()
+    numbers = _session_numbers(db, book)
+    return [_out(h, c, m, numbers) for h, c, m in rows]
+
+
+@router.patch("/highlights/{highlight_id}", response_model=HighlightOut)
+def update_highlight(
+    highlight_id: int,
+    payload: HighlightPatch,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    row = _owned(db, highlight_id, user)
+    sent = payload.model_fields_set
+    if "color" in sent and payload.color is not None:
+        row.color = payload.color
+    if "comment" in sent:
+        row.comment = payload.comment
+    db.commit()
+    db.refresh(row)
+    ms = db.get(MicroSession, row.micro_session_id)
+    return _out(row, db.get(Chapter, ms.chapter_id), ms, _session_numbers(db, db.get(Book, row.book_id)))
+
+
+@router.delete("/highlights/{highlight_id}", status_code=204)
+def delete_highlight(
+    highlight_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    db.delete(_owned(db, highlight_id, user))
+    db.commit()
+    return Response(status_code=204)

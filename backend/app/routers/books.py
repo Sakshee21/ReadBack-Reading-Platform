@@ -26,6 +26,7 @@ from app.schemas import (
     JumpRequest,
     MicroSessionListItemOut,
     MicroSessionOut,
+    MicroSessionPart,
     ProgressOut,
     ReaderPositionOut,
 )
@@ -172,6 +173,7 @@ def _build_reader_position(
         word_count=sum(ms.word_count for ms in block),
         is_cliffhanger_break=block[-1].is_cliffhanger_break,
         has_visualization_prompt=any(ms.has_visualization_prompt for ms in block),
+        parts=[MicroSessionPart(id=ms.id, text=ms.text) for ms in block],
     )
 
     recap = None
@@ -206,13 +208,24 @@ def _build_reader_position(
 
 @router.get("/{book_id}/reader", response_model=ReaderPositionOut)
 def get_reader_position(
-    book_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+    book_id: int,
+    ms: int | None = None,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
+    """The reader's saved position. With ``ms`` it is a read-only peek at that
+    passage (used by "Go to passage" in the notes page): the saved position is
+    left alone until the reader actually finishes a session there."""
     book = book_for_user(db, book_id, user)
     if not book.chapters:
         raise HTTPException(status_code=422, detail="Book has no content")
 
     progress = _get_or_create_progress(db, user, book)
+    if ms is not None:
+        peeked = db.get(MicroSession, ms)
+        if not peeked or peeked.chapter.book_id != book.id:
+            raise HTTPException(status_code=404, detail="Micro-session not found for this book")
+        return _build_reader_position(db, user, book, progress, peeked)
     micro_session = db.get(MicroSession, progress.current_micro_session_id)
     if not micro_session:
         raise HTTPException(status_code=422, detail="No reading position available")

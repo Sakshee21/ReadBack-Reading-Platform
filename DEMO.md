@@ -221,6 +221,34 @@ custom palette; Reset; Automatic with the device in dark mode.
 
 ---
 
+### G4. Highlights and notes -> *passages to review, plot points to remember*
+While reading, select any text. A bar appears at the bottom: pick one of six
+colours (Yellow, Green, Blue, Pink, Orange, Purple; each has a name, not just a
+colour) to save it, optionally with a comment typed first. Keyboard: select with
+Shift+arrows, press **Alt+H** to jump into the bar, Escape closes it. Activate a
+highlighted passage to change its colour, edit the comment or delete it. The
+bar never appears in RSVP mode, during overlays, the quiz or a reading break,
+and a new highlight cannot overlap an existing one (edit that one instead).
+
+Each book has a notes page (**Notes** in the reader top bar and on every
+Library card): highlights by chapter in reading order, filter by colour,
+**Go to passage** (opens the reader on that passage and focuses the
+highlight), edit, delete (second press confirms) and **Export as Markdown**.
+Locations are the same "Session N" numbers as the Sessions drawer, since the
+books have no page numbers.
+
+Privacy: highlights belong to the reader. The research event log only gets
+`highlight_created`, `highlight_edited`, `highlight_deleted`, `notes_opened`,
+`notes_exported` and `highlight_jump` with colour, length and counts; the
+quoted text and comments are never logged or in the CSV export.
+
+Manual check: highlight in each theme (Automatic, Dark, Black and white,
+Custom); across a sentence that spans two paragraphs; text containing an emoji;
+RSVP mode shows no bar; open Notes, filter, Go to passage lands on the
+highlight; export opens in a Markdown viewer.
+
+---
+
 ### H. The research layer → *close here*
 **Do:** open in the second tab:
 ```

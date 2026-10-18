@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { api, logEvent } from "../api";
 import RecapBanner from "../components/RecapBanner";
 import VisualizationPrompt from "../components/VisualizationPrompt";
@@ -17,10 +17,16 @@ import BreakOffer from "../components/BreakOffer";
 import BreakShell from "../components/BreakShell";
 import { useBreakFlow } from "../breaks/useBreakFlow";
 import { useSettings } from "../SettingsContext";
+import HighlightableText from "../components/HighlightableText";
+import { useBookHighlights } from "../highlights/useBookHighlights";
+import { highlightingEnabled, loadInitialPosition, parseDeepLink, partsOf } from "../highlights/readerGlue";
 
 export default function Reader() {
   const { bookId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [position, setPosition] = useState(null);
+  const [focusHighlightId, setFocusHighlightId] = useState(null);
   const [streak, setStreak] = useState(null);
   const [pace, setPace] = useState(null);
   const [sessionId, setSessionId] = useState(null);
@@ -49,6 +55,8 @@ export default function Reader() {
       celebration !== null || drawerOpen || settingsOpen || unstuckPrompt || burstParagraph !== null,
     resume: () => advanceRef.current?.(),
   });
+  const clearFocusHighlight = useCallback(() => setFocusHighlightId(null), []);
+  const { highlights, replaceForPart } = useBookHighlights(bookId, position?.micro_session?.id ?? null);
   const startedForMicroSession = useRef(null);
   const contentAreaRef = useRef(null);
   const topbarRef = useRef(null);
@@ -106,8 +114,14 @@ export default function Reader() {
     setPosition(null);
     setBookFinished(false);
     startedForMicroSession.current = null;
-    Promise.all([api.getReaderPosition(bookId), api.getStreak(), api.getPace(bookId)])
+    // Arriving from the notes page: open at that passage and focus the highlight.
+    const link = parseDeepLink(location.search);
+    Promise.all([loadInitialPosition(api, bookId, link.ms), api.getStreak(), api.getPace(bookId)])
       .then(([pos, streakData, paceData]) => {
+        if (link.ms) {
+          setFocusHighlightId(link.h);
+          navigate(`/read/${bookId}`, { replace: true });
+        }
         setPosition(pos);
         setStreak(streakData);
         setPace(paceData);
@@ -434,6 +448,17 @@ export default function Reader() {
     chapterId: position.chapter_id,
     microSessionId: position.micro_session.id,
   };
+  const canHighlight = highlightingEnabled({
+    rsvpActive,
+    celebrationActive: celebration !== null,
+    drawerOpen,
+    settingsOpen,
+    quizDue: Boolean(position.checkpoint_due),
+    unstuckPrompt,
+    burstActive: burstParagraph !== null,
+    countdownActive,
+    breakPhase: breaks.phase,
+  });
 
   return (
     <div className="reader-page">
@@ -461,6 +486,10 @@ export default function Reader() {
             <Icon name="settings" />
             Settings
           </button>
+          <Link to={`/books/${position.book.id}/notes`} className="icon-btn">
+            <Icon name="notes" />
+            Notes
+          </Link>
           <Link to="/library" className="icon-btn">
             <Icon name="library" />
             Library
@@ -490,9 +519,19 @@ export default function Reader() {
             />
           ) : (
             <div className="fade-in-text" key={position.micro_session.id}>
-              {position.micro_session.text
-                .split(/\n{2,}/)
-                .map((paragraph, i) => <p key={i}>{paragraph}</p>)}
+              {partsOf(position.micro_session).map((part) => (
+                <HighlightableText
+                  key={part.id}
+                  text={part.text}
+                  bookId={position.book.id}
+                  microSessionId={part.id}
+                  enabled={canHighlight}
+                  highlights={highlights.filter((h) => h.micro_session_id === part.id)}
+                  onChanged={(rows) => replaceForPart(part.id, rows)}
+                  focusHighlightId={focusHighlightId}
+                  onFocused={clearFocusHighlight}
+                />
+              ))}
             </div>
           )}
           {position.micro_session.has_visualization_prompt && <VisualizationPrompt {...logCtx} />}

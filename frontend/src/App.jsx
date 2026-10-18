@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Library from "./pages/Library";
 import Reader from "./pages/Reader";
+import NotesPage from "./pages/NotesPage";
 
 function RequireAuth({ children }) {
   const { user, loading } = useAuth();
@@ -31,6 +32,14 @@ function AppRoutes() {
         element={
           <RequireAuth>
             <Reader />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/books/:bookId/notes"
+        element={
+          <RequireAuth>
+            <NotesPage />
           </RequireAuth>
         }
       />

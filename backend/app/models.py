@@ -5,6 +5,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     JSON,
     String,
@@ -194,3 +195,31 @@ class ReadingEvent(Base):
     event_type: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
     event_metadata: Mapped[dict | None] = mapped_column("event_metadata", JSON, nullable=True)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow, index=True)
+
+
+class Highlight(Base):
+    """A reader's private highlight of a passage. start/end are Unicode code
+    point offsets into MicroSession.text; the quote and its context are cut
+    from that text by the server, never taken from the client. Rows go away
+    with their book or micro-session (database-level cascade)."""
+
+    __tablename__ = "highlights"
+    __table_args__ = (Index("ix_highlights_user_book", "user_id", "book_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    book_id: Mapped[int] = mapped_column(ForeignKey("books.id", ondelete="CASCADE"), nullable=False)
+    micro_session_id: Mapped[int] = mapped_column(
+        ForeignKey("micro_sessions.id", ondelete="CASCADE"), nullable=False
+    )
+    start: Mapped[int] = mapped_column(Integer, nullable=False)
+    end: Mapped[int] = mapped_column(Integer, nullable=False)
+    quote: Mapped[str] = mapped_column(Text, nullable=False)
+    context_before: Mapped[str] = mapped_column(Text, default="")
+    context_after: Mapped[str] = mapped_column(Text, default="")
+    color: Mapped[str] = mapped_column(String(16), nullable=False)
+    comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow)
+    updated_at: Mapped[dt.datetime] = mapped_column(
+        DateTime, default=dt.datetime.utcnow, onupdate=dt.datetime.utcnow
+    )

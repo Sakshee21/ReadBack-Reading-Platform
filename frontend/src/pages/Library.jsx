@@ -132,6 +132,15 @@ export default function Library() {
               ) : (
                 <div className="book-card is-unavailable">{inner}</div>
               )}
+              {ready && (
+                <Link
+                  to={`/books/${book.id}/notes`}
+                  className={`book-notes${book.is_user_uploaded ? " has-delete" : ""}`}
+                  aria-label={`Notes for ${book.title}`}
+                >
+                  Notes
+                </Link>
+              )}
               {book.is_user_uploaded && (
                 <button
                   className="book-delete"
