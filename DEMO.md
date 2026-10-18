@@ -206,6 +206,21 @@ the whole break. Events: `break_offered`, `break_accepted`,
 
 ---
 
+### G3. Appearance -> *readers choose how it looks*
+Settings -> **Theme**: Automatic (default: follows the device and shows each
+book's tint), Light, Dark, Black and white, or Custom (four colour pickers:
+background, cards, text, accent; the rest is derived). Anything other than
+Automatic turns off the book tint. The contrast guard warns below 4.5 to 1 and
+refuses below 3 to 1 (the colour is not applied and a message says why).
+**Reset appearance** always returns to Automatic. Changes are logged as
+`theme_changed`.
+
+Manual check: switch each theme on the Library and inside a book; reload and
+confirm no flash of the old colours; try a low-contrast and an unreadable
+custom palette; Reset; Automatic with the device in dark mode.
+
+---
+
 ### H. The research layer → *close here*
 **Do:** open in the second tab:
 ```

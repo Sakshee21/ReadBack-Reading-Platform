@@ -1,4 +1,6 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { applyTheme, normalizeAppearance, normalizePalette } from "./theme/appearance";
+import { DEFAULT_PALETTE, SCHEME_IDS } from "./theme/schemes";
 
 const STORAGE_KEY = "readback_settings";
 
@@ -10,11 +12,15 @@ const DEFAULTS = {
   ambientVolume: 0.4,
   // Offer a short optional puzzle break after ~10 minutes of reading.
   offerBreaks: true,
+  // Appearance: "auto" keeps the stylesheet look (device mode + book tint).
+  scheme: "auto",
+  customPalette: DEFAULT_PALETTE,
 };
 
 function readStored() {
   try {
-    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") };
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    return { ...DEFAULTS, ...stored, ...normalizeAppearance(stored) };
   } catch {
     return { ...DEFAULTS };
   }
@@ -52,6 +58,11 @@ export function SettingsProvider({ children }) {
 
   const reduceMotion = settings.reduceMotion ?? systemReduce;
 
+  // Before paint, so a change never shows a frame of the old colours.
+  useLayoutEffect(() => {
+    applyTheme(settings.scheme, settings.customPalette);
+  }, [settings.scheme, settings.customPalette]);
+
   // One switch drives every animation in the app (see motion.css). Writing
   // "false" explicitly also lets a user who wants motion override the OS hint.
   useEffect(() => {
@@ -70,6 +81,15 @@ export function SettingsProvider({ children }) {
       setAmbientId: (v) => update({ ambientId: v }),
       setAmbientVolume: (v) => update({ ambientVolume: v }),
       setOfferBreaks: (v) => update({ offerBreaks: v }),
+      setScheme: (id) => {
+        if (SCHEME_IDS.includes(id)) update({ scheme: id });
+      },
+      setCustomPalette: (palette) =>
+        setSettings((s) => ({
+          ...s,
+          customPalette: normalizePalette({ ...s.customPalette, ...palette }),
+        })),
+      resetAppearance: () => update({ scheme: "auto", customPalette: DEFAULT_PALETTE }),
       resetMotionToSystem: () => update({ reduceMotion: null }),
     }),
     [settings, reduceMotion, update]
