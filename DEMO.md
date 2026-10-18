@@ -183,6 +183,29 @@ cliffhanger or a chapter break.
 
 ---
 
+### G2. Reading breaks → *attention recovery, with a hard stop*
+After about 10 minutes of **active** reading (tab-hidden time excluded), the
+end of a session offers an optional 2-minute puzzle instead of the autoplay
+countdown. It never interrupts a passage and waits for the celebration to
+finish. Declining continues straight on. The puzzle has no score, timer or
+replay, a 3-minute hard cap, and always a "Skip" and "Show solution". At most
+3 offers a day, and none when a quiz is due next. Toggle: Settings → *Offer
+short breaks*.
+
+**To demo without reading for 10 minutes** (development server only): open the
+reader with `?break=now`, e.g. `http://localhost:5173/read/2?break=now`, and
+finish one session. The rotation has six puzzles (odd one out / what comes
+next, matching cards, sliding tile, connect the dots, mini sudoku, word ladder /
+anagram), played in a shuffled order with no repeat
+until all have appeared; the reader never picks one. The quick games (odd one
+out, connect the dots, word ladder / anagram) serve 3 to 4 short puzzles in a
+row ("Puzzle 2 of 4", advanced with a "Next puzzle" button) so the break doesn't
+feel over before it starts; the other three serve one. The 3-minute cap covers
+the whole break. Events: `break_offered`, `break_accepted`,
+`break_game_start`, `break_game_end`, `break_back_to_reading`.
+
+---
+
 ### H. The research layer → *close here*
 **Do:** open in the second tab:
 ```

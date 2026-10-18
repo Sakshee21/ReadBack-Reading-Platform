@@ -55,6 +55,43 @@ def test_new_event_types_are_accepted(client, auth):
     assert resp.json() == {"logged": len(payload)}
 
 
+BREAK_EVENT_TYPES = [
+    "break_offered",
+    "break_accepted",
+    "break_declined",
+    "break_deferred",
+    "break_game_start",
+    "break_game_end",
+    "break_game_error",
+    "break_back_to_reading",
+]
+
+
+def test_break_events_are_accepted_and_exported(client, auth):
+    """The optional reading-break flow logs these; they must reach the pilot
+    export so pace and quiz scores can be compared around breaks."""
+    headers, email = auth
+    payload = [
+        {"event_type": t, "book_id": 2, "metadata": {"active_ms_since_last_break": 612000}}
+        for t in BREAK_EVENT_TYPES
+    ]
+    payload[BREAK_EVENT_TYPES.index("break_game_end")]["metadata"].update(
+        {"game_id": "odd_one_out", "outcome": "solved", "duration_ms": 41000}
+    )
+    resp = client.post("/events", json=payload, headers=headers)
+    assert resp.status_code == 201
+    assert resp.json() == {"logged": len(BREAK_EVENT_TYPES)}
+
+    export = client.get(f"/admin/export/events.csv?token={settings.admin_token}")
+    assert export.status_code == 200
+    mine = [r for r in csv.DictReader(io.StringIO(export.text)) if r["user_email"] == email]
+    logged_types = {r["event_type"] for r in mine}
+    for event_type in BREAK_EVENT_TYPES:
+        assert event_type in logged_types, f"{event_type} missing from CSV export"
+    game_end = [r for r in mine if r["event_type"] == "break_game_end"][-1]
+    assert "odd_one_out" in game_end["metadata"] and "solved" in game_end["metadata"]
+
+
 def test_existing_event_types_still_work(client, auth):
     headers, _ = auth
     for event_type in EXISTING_EVENT_TYPES:

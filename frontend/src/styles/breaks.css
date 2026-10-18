@@ -1,0 +1,336 @@
+/* Reading breaks. Deliberately free of transitions and animations, so Reduce
+   Motion has nothing to switch off and nothing here can feel like a hook. */
+
+.brk-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40; /* above every other overlay, drawer and toast */
+}
+
+.brk-card {
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 2rem;
+  width: min(92vw, 380px);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.brk-card-game {
+  width: min(92vw, 420px);
+}
+
+.brk-title {
+  margin: 0 0 0.5rem;
+  font-family: var(--serif);
+}
+
+.brk-text,
+.brk-instruction {
+  color: var(--text-muted);
+  margin: 0 0 1.25rem;
+}
+
+.brk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.brk-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin: 0 auto 0.5rem;
+}
+
+.brk-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 84px;
+  background: var(--bg);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.brk-cell:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.brk-cell:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.brk-cell:disabled {
+  cursor: default;
+}
+
+.brk-cell-odd {
+  border-color: var(--accent);
+  border-style: dashed;
+}
+
+.brk-cell-tag {
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.brk-feedback {
+  min-height: 1.4rem;
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.brk-end {
+  margin-top: 0.5rem;
+}
+
+/* Matching cards */
+.brk-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin: 0 auto 0.5rem;
+}
+
+.brk-card-tile {
+  min-height: 64px;
+  font-size: 1.6rem;
+  background: var(--accent);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.brk-card-tile.brk-card-up {
+  background: var(--bg);
+  border-color: var(--accent);
+}
+
+/* A matched pair is told apart from a face-up guess by a solid frame, not colour alone. */
+.brk-card-tile.brk-card-matched {
+  border-style: double;
+  border-width: 5px;
+}
+
+.brk-card-tile:focus-visible,
+.brk-tile:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Sliding tile */
+.brk-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin: 0 auto 0.5rem;
+}
+
+.brk-tile {
+  min-height: 72px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.brk-tile-blank {
+  border-style: dashed;
+  background: transparent;
+  cursor: default;
+}
+
+/* What comes next */
+.brk-sequence {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+}
+
+.brk-seq-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+}
+
+.brk-seq-missing {
+  border-style: dashed;
+  font-size: 1.4rem;
+  color: var(--text-muted);
+}
+
+.brk-options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin: 0 auto 0.5rem;
+}
+
+/* Connect the dots. Pair colours are paired with a symbol in every cell. */
+.brk-dots {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.3rem;
+  margin: 0 auto 0.5rem;
+}
+
+.brk-dot-cell {
+  min-height: 52px;
+  font-size: 1.2rem;
+  background: var(--bg);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.brk-dot-end {
+  font-weight: 700;
+}
+
+.brk-pair-0 { background: #f4c7cd; border-color: #d1495b; color: #6b1a25; }
+.brk-pair-1 { background: #c2dcec; border-color: #2e86ab; color: #123c52; }
+.brk-pair-2 { background: #f7e0b0; border-color: #c98a14; color: #5a3b00; }
+.brk-pair-3 { background: #c9e3cf; border-color: #3f7a4d; color: #173a22; }
+
+.brk-dot-cell:focus-visible,
+.brk-sudoku-cell:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Mini sudoku */
+.brk-sudoku {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.25rem;
+  margin: 0 auto 0.75rem;
+}
+
+.brk-sudoku-cell {
+  position: relative;
+  min-height: 56px;
+  font-size: 1.4rem;
+  background: var(--bg);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.brk-sudoku-cell.brk-box-right { margin-right: 0.4rem; }
+.brk-sudoku-cell.brk-box-bottom { margin-bottom: 0.4rem; }
+.brk-sudoku-cell.brk-given { font-weight: 700; background: var(--surface); }
+.brk-sudoku-cell.brk-selected { border-color: var(--accent); border-width: 3px; }
+.brk-sudoku-cell.brk-conflict { border-color: var(--danger); border-style: dashed; }
+
+.brk-mark {
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  font-size: 0.85rem;
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.brk-pad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Word play */
+.brk-chain {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.brk-chain li {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--serif);
+  font-size: 1.1rem;
+}
+
+.brk-letters {
+  font-size: 1.6rem;
+  letter-spacing: 0.15rem;
+  margin: 0 0 0.75rem;
+  font-family: var(--serif);
+}
+
+.brk-answer {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+}
+
+.brk-word-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.brk-input {
+  width: 8rem;
+  padding: 0.5rem;
+  font-size: 1.1rem;
+  text-align: center;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* The pair currently being drawn gets a heavier frame (in addition to its symbol). */
+.brk-dot-cell.brk-dot-active {
+  outline: 3px solid var(--text);
+  outline-offset: -3px;
+}
+
+/* Where you are in a multi-puzzle break. A position, not a score or a timer. */
+.brk-progress {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

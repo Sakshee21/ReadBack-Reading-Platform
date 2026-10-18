@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./styles/global.css";
 import "./styles/themes.css";
 import "./styles/motion.css";
+import "./styles/breaks.css";
 import App from "./App.jsx";
 
 createRoot(document.getElementById("root")).render(

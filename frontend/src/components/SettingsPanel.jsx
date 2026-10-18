@@ -9,6 +9,8 @@ export default function SettingsPanel({ open, onClose, bookId = null }) {
     resetMotionToSystem,
     plainTheme,
     setPlainTheme,
+    offerBreaks,
+    setOfferBreaks,
   } = useSettings();
 
   if (!open) return null;
@@ -54,6 +56,18 @@ export default function SettingsPanel({ open, onClose, bookId = null }) {
           </label>
           <p className="settings-hint">
             Ignores each book's background tint and uses the default palette.
+          </p>
+
+          <label className="settings-row">
+            <input
+              type="checkbox"
+              checked={offerBreaks}
+              onChange={(e) => setOfferBreaks(e.target.checked)}
+            />
+            <span>Offer short breaks</span>
+          </label>
+          <p className="settings-hint">
+            After about 10 minutes of reading, offer an optional 2-minute puzzle. Never during a passage.
           </p>
 
           <hr className="settings-divider" />

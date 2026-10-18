@@ -13,6 +13,9 @@ import ProgressRing from "../components/ProgressRing";
 import SettingsPanel from "../components/SettingsPanel";
 import CelebrationOverlay, { celebrationFor } from "../components/CelebrationOverlay";
 import Icon from "../components/Icon";
+import BreakOffer from "../components/BreakOffer";
+import BreakShell from "../components/BreakShell";
+import { useBreakFlow } from "../breaks/useBreakFlow";
 import { useSettings } from "../SettingsContext";
 
 export default function Reader() {
@@ -35,7 +38,17 @@ export default function Reader() {
   const [celebration, setCelebration] = useState(null);
   const [streakBump, setStreakBump] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const { plainTheme } = useSettings();
+  const { plainTheme, offerBreaks } = useSettings();
+  // advanceToNextPosition is declared further down; the break flow reaches it
+  // through this ref so the hook can be called before it exists.
+  const advanceRef = useRef(null);
+  const breaks = useBreakFlow({
+    enabled: offerBreaks,
+    // The offer waits while any other overlay is up so overlays never stack.
+    celebrationActive:
+      celebration !== null || drawerOpen || settingsOpen || unstuckPrompt || burstParagraph !== null,
+    resume: () => advanceRef.current?.(),
+  });
   const startedForMicroSession = useRef(null);
   const contentAreaRef = useRef(null);
   const topbarRef = useRef(null);
@@ -52,9 +65,10 @@ export default function Reader() {
 
   const endSessionLog = useCallback((reason) => {
     const log = sessionLog.current;
-    if (!log) return;
+    if (!log) return 0;
     const now = Date.now();
     const hidden = log.hiddenAccum + (log.hiddenSince ? now - log.hiddenSince : 0);
+    const activeMs = Math.max(0, now - log.startedAt - hidden);
     logEvent("session_end", {
       bookId: log.bookId,
       chapterId: log.chapterId,
@@ -63,9 +77,10 @@ export default function Reader() {
       // word_count travels with active_ms so reading pace is derivable from
       // the event log alone (see services/pace.py).
       word_count: log.wordCount,
-      active_ms: Math.max(0, now - log.startedAt - hidden),
+      active_ms: activeMs,
     });
     sessionLog.current = null;
+    return activeMs;
   }, []);
 
   // Accumulate hidden time onto the active session log across tab switches.
@@ -114,6 +129,7 @@ export default function Reader() {
       .startSession(Number(bookId), msId)
       .then((session) => {
         setSessionId(session.id);
+        breaks.onSessionStart();
         endSessionLog("advance");
         sessionLog.current = {
           ...ctx,
@@ -125,7 +141,7 @@ export default function Reader() {
         logEvent("session_start", { ...ctx, word_count: position.micro_session.word_count });
       })
       .catch((err) => setError(err.message || "Could not start session"));
-  }, [position, bookId, endSessionLog]);
+  }, [position, bookId, endSessionLog, breaks.onSessionStart]);
 
   // Reset the per-micro-session recap state and log that a recap was shown.
   useEffect(() => {
@@ -150,7 +166,12 @@ export default function Reader() {
   const msId = position?.micro_session?.id;
   const readingActive = Boolean(position && !position.checkpoint_due && sessionId && !bookFinished);
   const unstuckBlocked =
-    rsvpActive || burstParagraph !== null || countdownActive || awaitingManualContinue || unstuckPrompt;
+    rsvpActive ||
+    burstParagraph !== null ||
+    countdownActive ||
+    awaitingManualContinue ||
+    unstuckPrompt ||
+    breaks.phase !== "idle";
   useEffect(() => {
     if (!readingActive || unstuckBlocked || unstuckResolvedRef.current === msId) return;
     let timer;
@@ -275,10 +296,12 @@ export default function Reader() {
       })
       .catch((err) => setError(err.message || "Could not load next session"));
   }, [bookId]);
+  advanceRef.current = advanceToNextPosition;
 
   const jumpTo = useCallback(
     (microSessionId) => {
       endSessionLog("jump");
+      breaks.cancelDue();
       api
         .jumpToMicroSession(bookId, microSessionId)
         .then((pos) => {
@@ -290,7 +313,7 @@ export default function Reader() {
         })
         .catch((err) => setError(err.message || "Could not jump to that session"));
     },
-    [bookId, endSessionLog]
+    [bookId, endSessionLog, breaks.cancelDue]
   );
 
   function handlePrevious() {
@@ -318,7 +341,7 @@ export default function Reader() {
     try {
       const result = await api.completeSession(sessionId);
       logEvent("session_complete", { ...ctx, word_count: position.micro_session.word_count });
-      endSessionLog("complete");
+      const activeMs = endSessionLog("complete");
 
       if (result.session_size_changed) {
         logEvent("session_size", { bookId: ctx.bookId, level: result.session_size_level });
@@ -364,7 +387,14 @@ export default function Reader() {
       if (result.finished_book) {
         setBookFinished(true);
       } else {
-        setCountdownActive(true);
+        // When a break is pending the offer replaces the autoplay countdown.
+        const breakPending = breaks.onSessionComplete({
+          activeMs,
+          quizDue: Boolean(result.checkpoint_due),
+          finished: false,
+          ctx,
+        });
+        if (!breakPending) setCountdownActive(true);
       }
     } catch (err) {
       setError(err.message || "Could not save your progress");
@@ -372,6 +402,7 @@ export default function Reader() {
   }
 
   function handleCheckpointDone() {
+    breaks.onQuizDone();
     setPosition((p) => ({ ...p, checkpoint_due: null }));
   }
 
@@ -534,6 +565,21 @@ export default function Reader() {
             setCountdownActive(false);
             setAwaitingManualContinue(true);
           }}
+        />
+      )}
+
+      {breaks.phase === "offered" && <BreakOffer onAccept={breaks.accept} onDecline={breaks.decline} />}
+
+      {(breaks.phase === "playing" || breaks.phase === "ended") && breaks.game && (
+        <BreakShell
+          game={breaks.game}
+          puzzle={breaks.puzzle}
+          seed={breaks.seed}
+          rounds={breaks.rounds}
+          startedAt={breaks.startedAt}
+          onFinish={breaks.finish}
+          onDone={breaks.done}
+          onError={breaks.onGameError}
         />
       )}
 

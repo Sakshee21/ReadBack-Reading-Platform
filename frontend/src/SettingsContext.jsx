@@ -8,6 +8,8 @@ const DEFAULTS = {
   plainTheme: false,
   ambientId: "none",
   ambientVolume: 0.4,
+  // Offer a short optional puzzle break after ~10 minutes of reading.
+  offerBreaks: true,
 };
 
 function readStored() {
@@ -67,6 +69,7 @@ export function SettingsProvider({ children }) {
       setPlainTheme: (v) => update({ plainTheme: v }),
       setAmbientId: (v) => update({ ambientId: v }),
       setAmbientVolume: (v) => update({ ambientVolume: v }),
+      setOfferBreaks: (v) => update({ offerBreaks: v }),
       resetMotionToSystem: () => update({ reduceMotion: null }),
     }),
     [settings, reduceMotion, update]
