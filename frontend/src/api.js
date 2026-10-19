@@ -85,6 +85,14 @@ export const api = {
     ),
   updateHighlight: (id, body) => request(`/highlights/${id}`, { method: "PATCH", body }),
   deleteHighlight: (id) => request(`/highlights/${id}`, { method: "DELETE" }),
+
+  getThemes: (bookId) => request(`/books/${bookId}/themes`),
+  getThemePassages: (bookId, theme) => request(`/books/${bookId}/themes/${theme}`),
+  getPassageThemes: (bookId, microSessionId) => request(`/books/${bookId}/passage-themes?ms=${microSessionId}`),
+  setThemeConsent: (bookId, granted) =>
+    request(`/books/${bookId}/theme-consent`, { method: "PATCH", body: { granted } }),
+  prefetchThemes: (bookId, microSessionId) =>
+    request(`/books/${bookId}/themes/prefetch`, { method: "POST", body: { micro_session_id: microSessionId } }),
 };
 
 /**
@@ -92,12 +100,13 @@ export const api = {
  * reports upload progress, and a 12MB EPUB over a slow connection needs a
  * progress bar. Returns the created book's {id, status, title}.
  */
-export function uploadBook({ file, title, author, onProgress }) {
+export function uploadBook({ file, title, author, themeTaggingConsent = false, onProgress }) {
   return new Promise((resolve, reject) => {
     const form = new FormData();
     form.append("file", file);
     if (title) form.append("title", title);
     if (author) form.append("author", author);
+    form.append("theme_tagging_consent", themeTaggingConsent ? "true" : "false");
 
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `${API_URL}/books/upload`);

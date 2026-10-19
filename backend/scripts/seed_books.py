@@ -300,6 +300,20 @@ SEED_BOOKS = [
 ]
 
 
+def import_shipped_tags():
+    """Load the theme tags that ship with the repo, if the file is there. Tags
+    already in the database are never overwritten."""
+    from app.services import theme_seed
+    from scripts.import_theme_tags import report
+
+    db = SessionLocal()
+    try:
+        summary = theme_seed.import_file(db, theme_seed.DEFAULT_PATH)
+    finally:
+        db.close()
+    print(report(summary) if summary is not None else "No shipped theme tags file; skipping.")
+
+
 def seed():
     for entry in SEED_BOOKS:
         book_id = import_book(entry["gutenberg_id"], chapter_summaries=entry["chapter_summaries"])
@@ -341,6 +355,7 @@ def seed():
         finally:
             db.close()
 
+    import_shipped_tags()
     print("Seeding complete.")
 
 

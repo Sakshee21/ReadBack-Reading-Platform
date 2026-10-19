@@ -39,6 +39,13 @@ const PATHS = {
       <line x1="8" y1="17" x2="14" y2="17" />
     </>
   ),
+  // tag - themes
+  themes: (
+    <>
+      <path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z" />
+      <line x1="7" y1="7" x2="7.01" y2="7" />
+    </>
+  ),
   // lightning bolt - the focus burst
   rsvp: <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />,
   // tray with an up arrow

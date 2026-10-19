@@ -34,13 +34,35 @@ class Settings(BaseSettings):
     # every Nth session rather than at every cliffhanger.
     upload_visualization_prompts: bool = True
     upload_visualization_every: int = 5
-    # Groq is used offline by scripts/generate_recaps.py only. The app never
-    # calls an LLM at request time, so an empty key is fine at runtime.
+    # Unused since the recap script moved to OpenRouter (OP_API_KEY / OP_MODEL).
+    # Kept so an old .env that still has GROQ_* lines keeps loading.
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
+    # OpenRouter, used offline by the theme-tagging script only (never at
+    # request time). Set OP_API_KEY and OP_MODEL in backend/.env.
+    op_api_key: str = ""
+    op_model: str = ""
+    # Which provider the offline scripts and the on-demand worker use:
+    # "openrouter" (OP_*) or "ollama" (OLLAMA_*, e.g. gemma4:31b on Ollama cloud).
+    llm_provider: str = "openrouter"
+    ollama_api_key: str = ""
+    ollama_model: str = ""
+    ollama_url: str = "https://ollama.com/api/chat"
+    # On-demand theme tagging for consented uploads (off unless switched on).
+    theme_tagging_on_demand: bool = False
+    # Pause between model calls, to respect free-tier rate limits.
+    theme_call_gap_seconds: float = 4.0
     micro_session_min_words: int = 400
     micro_session_max_words: int = 600
     cors_origins: list[str] = ["http://localhost:5173"]
+
+    @property
+    def llm_api_key(self) -> str:
+        return self.ollama_api_key if self.llm_provider == "ollama" else self.op_api_key
+
+    @property
+    def llm_model(self) -> str:
+        return self.ollama_model if self.llm_provider == "ollama" else self.op_model
 
     class Config:
         env_file = ".env"

@@ -103,3 +103,40 @@ def test_chunk_text_packs_paragraphs_up_to_limit():
 
 def test_chunk_text_empty():
     assert chunk_text("") == []
+
+
+# --- the recap script talks to OpenRouter, not Groq ---
+
+
+def test_recap_script_uses_openrouter_with_the_configured_model():
+    import json
+
+    import httpx
+
+    from scripts import generate_recaps
+
+    seen = {}
+
+    def handler(request):
+        seen["url"] = str(request.url)
+        seen["auth"] = request.headers["authorization"]
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"choices": [{"message": {"content": "  A short recap.  "}}]})
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    out = generate_recaps.llm_chat(client, "Summarise.", model="nvidia/x:free", api_key="k", delay=0)
+    assert out == "A short recap."
+    assert seen["url"] == "https://openrouter.ai/api/v1/chat/completions"
+    assert seen["auth"] == "Bearer k" and seen["body"]["model"] == "nvidia/x:free"
+
+
+def test_recap_script_refuses_an_empty_reply_instead_of_saving_it():
+    import httpx
+    import pytest
+
+    from scripts import generate_recaps
+
+    client = httpx.Client(transport=httpx.MockTransport(
+        lambda r: httpx.Response(200, json={"choices": [{"message": {"content": None}}]})))
+    with pytest.raises(generate_recaps.RecapLLMError):
+        generate_recaps.llm_chat(client, "Summarise.", model="m", api_key="k", delay=0)

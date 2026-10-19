@@ -20,6 +20,7 @@ export default function UploadBookDialog({ open, onClose, onAdded }) {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
+  const [themeConsent, setThemeConsent] = useState(false);
   const [phase, setPhase] = useState("idle"); // idle | uploading | processing | failed
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
@@ -32,6 +33,7 @@ export default function UploadBookDialog({ open, onClose, onAdded }) {
     setFile(null);
     setTitle("");
     setAuthor("");
+    setThemeConsent(false);
     setPhase("idle");
     setProgress(0);
     setError("");
@@ -102,6 +104,7 @@ export default function UploadBookDialog({ open, onClose, onAdded }) {
         file,
         title: title.trim(),
         author: author.trim(),
+        themeTaggingConsent: themeConsent,
         onProgress: setProgress,
       });
       setPhase("processing");
@@ -186,6 +189,20 @@ export default function UploadBookDialog({ open, onClose, onAdded }) {
               placeholder="Unknown"
               disabled={busy}
             />
+          </label>
+
+          <label className="upload-consent">
+            <input
+              type="checkbox"
+              checked={themeConsent}
+              onChange={(e) => setThemeConsent(e.target.checked)}
+              disabled={busy}
+            />{" "}
+            <span>
+              Allow theme tagging. Your book's text will be sent to an AI service (OpenRouter's free
+              models, which may log prompts and outputs) so passages can be labelled with themes.
+              You can withdraw this later.
+            </span>
           </label>
 
           {phase === "uploading" && (

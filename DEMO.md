@@ -249,6 +249,60 @@ highlight; export opens in a Markdown viewer.
 
 ---
 
+### G5. Theme tags -> *which passages deal with which themes*
+Every reading chunk can carry up to 3 themes from a fixed list of 14 (Mystery &
+detection, Romance & courtship, Grief, loss & death, Fear & the supernatural,
+Adventure & travel, War & conflict, Family & childhood, Class & money, Gender &
+women's roles, Justice & morality, Nature & place, Identity & self, Humour &
+satire, Madness & the mind), each with a score from 1 to 5. Only scores of 3 or
+more are shown or exported. The tags are made by an LLM (OpenRouter, model set in
+`backend/.env`) and stored in the database, so a chunk is never tagged twice.
+
+**Seeded books ship with their tags.** The five library books come with all 606 chunks already tagged (`backend/data/theme_tags.json`, made by one model). `python -m scripts.seed_books` loads them automatically, so every reader sees them with nothing to switch on, up to the passage they have reached. Tags are permanent: nothing ever re-tags or overwrites a chunk that has tags, whatever model or prompt made them. After re-tagging (only needed for new books) refresh the file with `python -m scripts.export_theme_tags` and commit it. `python -m scripts.import_theme_tags` loads a file by hand and is safe to repeat.
+
+**Your own uploads, as you read.** Tick *Allow theme tagging* when uploading (or on the book's Themes page). While you read, the passage you are on and the next four are tagged in the background, so tags usually appear when you reach the next passage. Reading never waits. Needs `THEME_TAGGING_ON_DEMAND=true` in `backend/.env`, then restart the API. Withdrawing consent deletes that upload's tags.
+
+**Choosing the model**
+Set `LLM_PROVIDER=openrouter` or `ollama` in `backend/.env` (with `OLLAMA_API_KEY` and `OLLAMA_MODEL=gemma4:31b` for Ollama). To compare two models on the same 20 chunks before committing to one: `python -m scripts.theme_compare --a openrouter --b ollama` (nothing is saved to the database; it writes `theme_compare.csv` for a person to judge).
+
+**Seeded books: one offline batch** (nothing at reading time)
+```bash
+cd backend && source .venv/bin/activate        # Windows: .venvScriptsactivate
+python -m scripts.tag_themes --dry-run         # counts and a token estimate, no calls
+python -m scripts.tag_themes --book 1 --limit 3   # try three chunks first
+python -m scripts.tag_themes                   # all five books (~2 hours; Ctrl+C and re-run to resume)
+```
+`.env` needs `OP_API_KEY` and `OP_MODEL` (for example
+`nvidia/nemotron-3-super-120b-a12b:free`). Re-running skips finished chunks.
+Tags are permanent: a chunk that has tags is never re-tagged or overwritten, whatever model or prompt made them. A failed chunk is recorded and retried on the next run.
+
+**Uploaded books: on demand, only with consent.** The upload dialog has an
+unticked "Allow theme tagging" box (the text goes to an AI service whose free
+tier may log it). With it ticked and `THEME_TAGGING_ON_DEMAND=true`, the chunks
+ahead of the reader are tagged in the background while they read; reading never
+waits. The owner can withdraw on the book's Themes page, which deletes its tags.
+Uploaded-book tags are private and never in the research export.
+
+**Readers:** Themes (top bar) lists the themes met so far with counts; choose one
+to see those passages with the theme names as text and a Go to passage link. The
+server only returns tags for passages already reached, so nothing spoils the
+rest of the story.
+
+**Researchers**
+- `/admin/export/themes.csv?token=<ADMIN_TOKEN>`: one row per chunk and theme
+  (seeded books only), joinable to the events export on `micro_session_id`.
+- Check the tags before relying on them:
+  ```bash
+  python -m scripts.theme_sample --out sample.csv --n 60     # give each of two coders a copy
+  python -m scripts.theme_agreement coder1.csv coder2.csv    # kappa per theme, human vs human and LLM vs each
+  ```
+  Report the numbers with the model and prompt version they were measured on.
+
+Honest limits: labels for abstract themes are subjective; free models can change;
+withdrawing consent cannot unsend text already sent.
+
+---
+
 ### H. The research layer → *close here*
 **Do:** open in the second tab:
 ```

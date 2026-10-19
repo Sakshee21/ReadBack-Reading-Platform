@@ -64,6 +64,10 @@ class Book(Base):
     # themes defined in frontend/src/styles/themes.css; tests check that every
     # theme keeps text contrast at WCAG AA.
     theme: Mapped[str] = mapped_column(String(32), default="parchment", server_default="parchment")
+    # Uploads only: the owner agreed that the text may be sent to an AI service
+    # to tag passages with themes. Without it the tagging code never reads the book.
+    theme_tagging_consent: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    theme_tagging_consent_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
 
     chapters: Mapped[list["Chapter"]] = relationship(
         back_populates="book", order_by="Chapter.index", cascade="all, delete-orphan"
@@ -223,3 +227,44 @@ class Highlight(Base):
     updated_at: Mapped[dt.datetime] = mapped_column(
         DateTime, default=dt.datetime.utcnow, onupdate=dt.datetime.utcnow
     )
+
+
+class MicroSessionTheme(Base):
+    """One theme tag on one reading chunk. Scores below 3 are kept for analysis
+    but never shown to readers or exported."""
+
+    __tablename__ = "micro_session_themes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    micro_session_id: Mapped[int] = mapped_column(
+        ForeignKey("micro_sessions.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    theme: Mapped[str] = mapped_column(String(32), nullable=False)
+    score: Mapped[int] = mapped_column(Integer, nullable=False)
+    source: Mapped[str] = mapped_column(String(8), default="llm", server_default="llm")
+    model: Mapped[str] = mapped_column(String(120), default="")
+    prompt_version: Mapped[int] = mapped_column(Integer, default=1)
+    theme_list_version: Mapped[int] = mapped_column(Integer, default=1)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow)
+
+    __table_args__ = (UniqueConstraint("micro_session_id", "theme", "source", name="uq_msthemes_chunk_theme_source"),)
+
+
+class MicroSessionTagging(Base):
+    """Tagging status of a chunk: pending (claimed), done, or failed. A chunk
+    with status done and no theme rows simply has no clear theme."""
+
+    __tablename__ = "micro_session_tagging"
+
+    micro_session_id: Mapped[int] = mapped_column(
+        ForeignKey("micro_sessions.id", ondelete="CASCADE"), primary_key=True
+    )
+    status: Mapped[str] = mapped_column(String(12), nullable=False)
+    model: Mapped[str] = mapped_column(String(120), default="")
+    prompt_version: Mapped[int] = mapped_column(Integer, default=1)
+    theme_list_version: Mapped[int] = mapped_column(Integer, default=1)
+    claimed_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+    updated_at: Mapped[dt.datetime] = mapped_column(
+        DateTime, default=dt.datetime.utcnow, onupdate=dt.datetime.utcnow
+    )
+    error: Mapped[str | None] = mapped_column(String(200), nullable=True)

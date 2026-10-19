@@ -43,6 +43,8 @@ class BookOut(BaseModel):
     source_type: str = "seeded"
     status: str = "ready"
     failure_reason: str | None = None
+    theme_tagging_consent: bool = False
+    theme_tagging_enabled: bool = False  # on-demand tagging is on (an upload with its owner's consent)
 
     class Config:
         from_attributes = True

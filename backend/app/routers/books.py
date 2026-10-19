@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import SessionLocal, get_db
 from app.deps import book_for_user, get_current_user
+from app.services import themes as theme_service
 from app.models import (
     Book,
     Chapter,
@@ -45,7 +46,7 @@ from app.services.segmentation import word_count
 router = APIRouter(prefix="/books", tags=["books"])
 
 
-def _book_out(book: Book) -> BookOut:
+def _book_out(book: Book, tagging_enabled: bool = False) -> BookOut:
     return BookOut(
         id=book.id,
         gutenberg_id=book.gutenberg_id,
@@ -58,6 +59,8 @@ def _book_out(book: Book) -> BookOut:
         source_type=book.source_type,
         status=book.status,
         failure_reason=book.failure_reason,
+        theme_tagging_consent=bool(book.theme_tagging_consent),
+        theme_tagging_enabled=tagging_enabled,
     )
 
 
@@ -70,7 +73,7 @@ def list_books(db: Session = Depends(get_db), user: User = Depends(get_current_u
         .order_by(Book.title)
         .all()
     )
-    return [_book_out(b) for b in books]
+    return [_book_out(b, theme_service.tagging_enabled(db, user, b)) for b in books]
 
 
 @router.get("/{book_id}", response_model=list[ChapterOut])
@@ -194,7 +197,7 @@ def _build_reader_position(
     progress_pct = round(100 * words_read_so_far / book.total_word_count, 2) if book.total_word_count else 0.0
 
     return ReaderPositionOut(
-        book=_book_out(book),
+        book=_book_out(book, theme_service.tagging_enabled(db, user, book)),
         micro_session=merged,
         chapter_id=chapter.id,
         chapter_index=chapter.index,
@@ -416,6 +419,7 @@ async def upload_book(
     file: UploadFile = File(...),
     title: str | None = Form(None),
     author: str | None = Form(None),
+    theme_tagging_consent: bool = Form(False),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
@@ -456,6 +460,8 @@ async def upload_book(
         is_user_uploaded=True,
         source_type="upload",
         status="processing",
+        theme_tagging_consent=theme_tagging_consent,
+        theme_tagging_consent_at=dt.datetime.utcnow() if theme_tagging_consent else None,
     )
     db.add(book)
     db.commit()

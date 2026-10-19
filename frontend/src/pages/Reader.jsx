@@ -18,6 +18,7 @@ import BreakShell from "../components/BreakShell";
 import { useBreakFlow } from "../breaks/useBreakFlow";
 import { useSettings } from "../SettingsContext";
 import HighlightableText from "../components/HighlightableText";
+import PassageThemes from "../components/PassageThemes";
 import { useBookHighlights } from "../highlights/useBookHighlights";
 import { highlightingEnabled, loadInitialPosition, parseDeepLink, partsOf } from "../highlights/readerGlue";
 
@@ -44,7 +45,7 @@ export default function Reader() {
   const [celebration, setCelebration] = useState(null);
   const [streakBump, setStreakBump] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const { plainTheme, offerBreaks } = useSettings();
+  const { plainTheme, offerBreaks, showThemeTags } = useSettings();
   // advanceToNextPosition is declared further down; the break flow reaches it
   // through this ref so the hook can be called before it exists.
   const advanceRef = useRef(null);
@@ -56,6 +57,15 @@ export default function Reader() {
     resume: () => advanceRef.current?.(),
   });
   const clearFocusHighlight = useCallback(() => setFocusHighlightId(null), []);
+  // A consented upload is tagged with themes in the background while it is read.
+  // Fire and forget: reading never waits for it and a failure changes nothing.
+  const themeBook = position?.book;
+  const prefetchKey = position?.micro_session?.id ?? null;
+  const tagThemesAhead = Boolean(themeBook?.theme_tagging_enabled);
+  useEffect(() => {
+    if (!tagThemesAhead || prefetchKey == null) return;
+    api.prefetchThemes(themeBook.id, prefetchKey).catch(() => {});
+  }, [tagThemesAhead, prefetchKey, themeBook?.id]);
   const { highlights, replaceForPart } = useBookHighlights(bookId, position?.micro_session?.id ?? null);
   const startedForMicroSession = useRef(null);
   const contentAreaRef = useRef(null);
@@ -486,6 +496,10 @@ export default function Reader() {
             <Icon name="settings" />
             Settings
           </button>
+          <Link to={`/books/${position.book.id}/themes`} className="icon-btn">
+            <Icon name="themes" />
+            Themes
+          </Link>
           <Link to={`/books/${position.book.id}/notes`} className="icon-btn">
             <Icon name="notes" />
             Notes
@@ -533,6 +547,9 @@ export default function Reader() {
                 />
               ))}
             </div>
+          )}
+          {showThemeTags && !rsvpActive && (
+            <PassageThemes bookId={position.book.id} microSessionId={position.micro_session.id} />
           )}
           {position.micro_session.has_visualization_prompt && <VisualizationPrompt {...logCtx} />}
         </div>

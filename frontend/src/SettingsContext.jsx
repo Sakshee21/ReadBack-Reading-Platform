@@ -12,6 +12,8 @@ const DEFAULTS = {
   ambientVolume: 0.4,
   // Offer a short optional puzzle break after ~10 minutes of reading.
   offerBreaks: true,
+  // Show the passage's theme tags under the text. Off unless the reader opts in.
+  showThemeTags: false,
   // Appearance: "auto" keeps the stylesheet look (device mode + book tint).
   scheme: "auto",
   customPalette: DEFAULT_PALETTE,
@@ -90,6 +92,7 @@ export function SettingsProvider({ children }) {
       setAmbientId: (v) => update({ ambientId: v }),
       setAmbientVolume: (v) => update({ ambientVolume: v }),
       setOfferBreaks: (v) => update({ offerBreaks: v }),
+      setShowThemeTags: (v) => update({ showThemeTags: v }),
       setScheme: (id) => {
         if (SCHEME_IDS.includes(id)) update({ scheme: id });
       },

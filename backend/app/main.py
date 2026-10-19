@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import admin, auth, books, checkpoints, events, highlights, nudge, pace, sessions, streaks
+from app.routers import admin, auth, books, checkpoints, events, highlights, nudge, pace, sessions, streaks, themes
 
 app = FastAPI(title="ReadBack API", version="0.1.0")
 
@@ -24,6 +24,7 @@ app.include_router(pace.router)
 app.include_router(nudge.router)
 app.include_router(admin.router)
 app.include_router(highlights.router)
+app.include_router(themes.router)
 
 
 @app.get("/health")

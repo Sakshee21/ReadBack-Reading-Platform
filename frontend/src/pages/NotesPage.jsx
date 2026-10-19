@@ -133,6 +133,9 @@ export default function NotesPage() {
           <Link to={`/read/${bookId}`} className="btn-secondary">
             Back to reading
           </Link>{" "}
+          <Link to={`/books/${bookId}/themes`} className="btn-secondary">
+            Themes
+          </Link>{" "}
           <Link to="/library" className="btn-secondary">
             Library
           </Link>

@@ -31,6 +31,8 @@ export default function SettingsPanel({ open, onClose, bookId = null }) {
     setPlainTheme,
     offerBreaks,
     setOfferBreaks,
+    showThemeTags,
+    setShowThemeTags,
     scheme,
     setScheme,
     customPalette,
@@ -195,6 +197,18 @@ export default function SettingsPanel({ open, onClose, bookId = null }) {
           </label>
           <p className="settings-hint">
             After about 10 minutes of reading, offer an optional 2-minute puzzle. Never during a passage.
+          </p>
+
+          <label className="settings-row">
+            <input
+              type="checkbox"
+              checked={showThemeTags}
+              onChange={(e) => setShowThemeTags(e.target.checked)}
+            />
+            <span>Show theme tags</span>
+          </label>
+          <p className="settings-hint">
+            Shows the themes of the passage you are on, after its text. Labelled by an AI model, so they can be wrong.
           </p>
 
           <hr className="settings-divider" />
