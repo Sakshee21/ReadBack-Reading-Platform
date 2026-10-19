@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api, logEvent } from "../api";
+import ThemeMap from "../components/ThemeMap";
 
 /**
  * The themes the reader has met so far, and the passages for each. The server
@@ -113,8 +114,9 @@ export default function ThemesPage() {
       </div>
 
       <p className="themes-note">
-        Themes are labelled by an AI model and can be wrong, so treat them as a guide. Only passages
-        you have reached are shown, so nothing here spoils what comes next.
+        Themes are labelled by an AI model and can be wrong, so treat them as a guide. By default only
+        passages you have reached are shown, so nothing spoils what comes next unless you ask the
+        theme map to show the whole book.
       </p>
 
       {isOwnUpload && (
@@ -152,6 +154,8 @@ export default function ThemesPage() {
       )}
 
       {preparing && <p className="themes-note">Some passages are still being prepared. Check back soon.</p>}
+
+      <ThemeMap key={`${bookId}-${book?.theme_tagging_consent ? "on" : "off"}`} bookId={bookId} />
 
       {data.themes.length === 0 ? (
         <p className="notes-empty">

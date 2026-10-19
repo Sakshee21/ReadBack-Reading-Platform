@@ -72,6 +72,49 @@ def list_themes(
     return {"themes": listing, "tagging": tagging}
 
 
+@router.get("/books/{book_id}/theme-map")
+def theme_map(
+    book_id: int,
+    reveal: str | None = None,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Where each theme sits across the book, one cell per tagged chunk.
+
+    By default only chunks the reader has reached have cells. ``reveal=all``
+    is the reader's explicit choice to see the whole book (it can spoil the
+    story); it works for any book the caller may open, and for an upload only
+    its owner can open it. Chapters and the total always describe the whole
+    book, which the progress bar already shows."""
+    if reveal is not None and reveal != "all":
+        raise HTTPException(status_code=422, detail="reveal must be 'all' or omitted.")
+    book = book_for_user(db, book_id, user)
+    ordered = ordered_micro_sessions(book)
+    position = {ms.id: i for i, ms in enumerate(ordered)}
+
+    chapters: list[dict] = []
+    for i, ms in enumerate(ordered):
+        chapter = ms.chapter
+        if chapters and chapters[-1]["index"] == chapter.index:
+            chapters[-1]["end"] = i
+        else:
+            chapters.append({"index": chapter.index, "title": chapter.title, "start": i, "end": i})
+
+    visible = set(position) if reveal == "all" else theme_service.reached_micro_session_ids(db, user, book)
+    by_theme: dict[str, list[dict]] = {}
+    for row in _shown(db, visible):
+        by_theme.setdefault(row.theme, []).append(
+            {"pos": position[row.micro_session_id], "micro_session_id": row.micro_session_id, "score": row.score}
+        )
+    order = list(THEMES)
+    listing = [
+        {"theme": t, "label": THEMES[t], "count": len(cells), "cells": sorted(cells, key=lambda c: c["pos"])}
+        for t, cells in by_theme.items()
+    ]
+    listing.sort(key=lambda item: (-item["count"], order.index(item["theme"])))
+    return {"reveal": reveal == "all", "total": len(ordered), "chapters": chapters, "themes": listing}
+
+
 @router.get("/books/{book_id}/themes/{theme}")
 def theme_passages(
     book_id: int,

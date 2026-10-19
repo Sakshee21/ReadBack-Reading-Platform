@@ -87,6 +87,8 @@ export const api = {
   deleteHighlight: (id) => request(`/highlights/${id}`, { method: "DELETE" }),
 
   getThemes: (bookId) => request(`/books/${bookId}/themes`),
+  getThemeMap: (bookId, reveal = false) =>
+    request(`/books/${bookId}/theme-map${reveal ? "?reveal=all" : ""}`),
   getThemePassages: (bookId, theme) => request(`/books/${bookId}/themes/${theme}`),
   getPassageThemes: (bookId, microSessionId) => request(`/books/${bookId}/passage-themes?ms=${microSessionId}`),
   setThemeConsent: (bookId, granted) =>

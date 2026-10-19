@@ -5,13 +5,14 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import ThemesPage from "./ThemesPage";
 
 const logged = [];
-const api = { getThemes: vi.fn(), getThemePassages: vi.fn(), listBooks: vi.fn(), setThemeConsent: vi.fn() };
+const api = { getThemes: vi.fn(), getThemePassages: vi.fn(), listBooks: vi.fn(), setThemeConsent: vi.fn(), getThemeMap: vi.fn() };
 vi.mock("../api", () => ({
   api: {
     getThemes: (...a) => api.getThemes(...a),
     getThemePassages: (...a) => api.getThemePassages(...a),
     listBooks: (...a) => api.listBooks(...a),
     setThemeConsent: (...a) => api.setThemeConsent(...a),
+    getThemeMap: (...a) => api.getThemeMap(...a),
   },
   logEvent: (type, fields) => logged.push({ type, ...fields }),
 }));
@@ -33,6 +34,7 @@ const BOOK = { id: 2, title: "Alice", is_user_uploaded: false, theme_tagging_con
 
 function setup({ themes = THEMES, book = BOOK } = {}) {
   api.getThemes.mockResolvedValue(themes);
+  api.getThemeMap.mockResolvedValue({ reveal: false, total: 2, chapters: [{ index: 1, title: "Chapter 1", start: 0, end: 1 }], themes: [{ theme: "romance", label: "Romance & courtship", count: 1, cells: [{ pos: 0, micro_session_id: 11, score: 5 }] }] });
   api.getThemePassages.mockResolvedValue(PASSAGES);
   api.listBooks.mockResolvedValue([book]);
   return render(
@@ -56,6 +58,8 @@ describe("ThemesPage", () => {
     expect(await screen.findByRole("radio", { name: /Romance & courtship \(2\)/ })).toBeTruthy();
     expect(screen.getByRole("radio", { name: /Mystery & detection \(1\)/ })).toBeTruthy();
     expect(screen.getByText(/only passages you have reached/i)).toBeTruthy();
+    // the theme map can be told to show unread parts, so the page must not promise otherwise
+    expect(screen.queryByText(/nothing here spoils/i)).toBeNull();
     expect(logged.filter((e) => e.type === "themes_opened")).toEqual([{ type: "themes_opened", bookId: 2, count: 2 }]);
   });
 
@@ -123,6 +127,23 @@ describe("ThemesPage", () => {
       </MemoryRouter>
     );
     expect((await screen.findByRole("alert")).textContent).toMatch(/could not load/i);
+  });
+
+  it("the_map_is_loaded_again_when_consent_is_withdrawn_so_deleted_tags_disappear", async () => {
+    api.setThemeConsent.mockResolvedValue({ theme_tagging_consent: false });
+    setup({ book: { id: 2, title: "Mine", is_user_uploaded: true, theme_tagging_consent: true } });
+    await screen.findByRole("group", { name: "Romance & courtship: 1 passage" });
+    const before = api.getThemeMap.mock.calls.length;
+    fireEvent.click(await screen.findByRole("button", { name: "Withdraw theme tagging" }));
+    fireEvent.click(screen.getByRole("button", { name: "Yes, withdraw" }));
+    await waitFor(() => expect(api.getThemeMap.mock.calls.length).toBeGreaterThan(before));
+  });
+
+  it("shows_the_theme_map_with_the_themes", async () => {
+    setup();
+    expect(await screen.findByRole("heading", { name: "Theme map" })).toBeTruthy();
+    expect(await screen.findByRole("group", { name: "Romance & courtship: 1 passage" })).toBeTruthy();
+    expect(api.getThemeMap).toHaveBeenCalledWith("2", false);
   });
 
   it("links_back_to_reading_and_notes", async () => {
