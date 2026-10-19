@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { applyTheme, normalizeAppearance, normalizePalette } from "./theme/appearance";
 import { DEFAULT_PALETTE, SCHEME_IDS } from "./theme/schemes";
+import { STYLES } from "./citations/format";
 
 const STORAGE_KEY = "readback_settings";
 
@@ -14,6 +15,8 @@ const DEFAULTS = {
   offerBreaks: true,
   // Show the passage's theme tags under the text. Off unless the reader opts in.
   showThemeTags: false,
+  // Citation style for copying quotes and exporting notes.
+  citationStyle: "apa",
   // Appearance: "auto" keeps the stylesheet look (device mode + book tint).
   scheme: "auto",
   customPalette: DEFAULT_PALETTE,
@@ -22,7 +25,8 @@ const DEFAULTS = {
 function readStored() {
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-    return { ...DEFAULTS, ...stored, ...normalizeAppearance(stored) };
+    const citationStyle = STYLES.includes(stored.citationStyle) ? stored.citationStyle : DEFAULTS.citationStyle;
+    return { ...DEFAULTS, ...stored, ...normalizeAppearance(stored), citationStyle };
   } catch {
     return { ...DEFAULTS };
   }
@@ -93,6 +97,9 @@ export function SettingsProvider({ children }) {
       setAmbientVolume: (v) => update({ ambientVolume: v }),
       setOfferBreaks: (v) => update({ offerBreaks: v }),
       setShowThemeTags: (v) => update({ showThemeTags: v }),
+      setCitationStyle: (v) => {
+        if (STYLES.includes(v)) update({ citationStyle: v });
+      },
       setScheme: (id) => {
         if (SCHEME_IDS.includes(id)) update({ scheme: id });
       },

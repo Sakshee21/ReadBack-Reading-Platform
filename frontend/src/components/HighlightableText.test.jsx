@@ -2,6 +2,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, fireEvent, act, cleanup, waitFor } from "@testing-library/react";
 import HighlightableText from "./HighlightableText";
+import { SettingsProvider } from "../SettingsContext";
 
 const logged = [];
 const api = {
@@ -374,5 +375,50 @@ describe("HighlightableText", () => {
     fireEvent.change(screen.getByLabelText("Comment (optional)"), { target: { value: "draft thought" } });
     select(node, 0, 5);
     expect(screen.getByLabelText("Comment (optional)").value).toBe("draft thought");
+  });
+});
+
+describe("citing from the edit bar", () => {
+  const book = {
+    title: "Alice",
+    author: "Carroll, Lewis",
+    published_year: 1865,
+    gutenberg_id: 11,
+    is_user_uploaded: false,
+  };
+  const withBook = (props) =>
+    render(
+      <SettingsProvider>
+        <HighlightableText
+          text={TEXT}
+          bookId={2}
+          microSessionId={11}
+          enabled
+          highlights={[row({ chapter_index: 1, chapter_title: "Chapter 1" })]}
+          onChanged={vi.fn()}
+          book={book}
+          {...props}
+        />
+      </SettingsProvider>
+    );
+
+  it("an_existing_highlight_can_be_cited_when_the_book_is_known", () => {
+    const { container } = withBook();
+    fireEvent.click(container.querySelector("mark"));
+    expect(screen.getByRole("button", { name: "Copy quote with citation" })).toBeTruthy();
+    expect(screen.getByLabelText("Citation style")).toBeTruthy();
+  });
+
+  it("creating_a_new_highlight_shows_no_cite_options_yet", () => {
+    const { container } = withBook({ highlights: [] });
+    select(firstText(container), 6, 11);
+    expect(screen.getByRole("group", { name: "Highlight" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Copy quote with citation" })).toBeNull();
+  });
+
+  it("without_book_details_nothing_about_citing_appears", () => {
+    const { container } = withBook({ book: undefined });
+    fireEvent.click(container.querySelector("mark"));
+    expect(screen.queryByRole("button", { name: "Copy quote with citation" })).toBeNull();
   });
 });

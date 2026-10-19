@@ -8,7 +8,7 @@ import { HIGHLIGHT_COLORS, MAX_COMMENT } from "../highlights/constants";
  * its own Save button.
  */
 const HighlightBar = forwardRef(function HighlightBar(
-  { mode, quote, initialColor, initialComment = "", error, busy, onPickColor, onSaveComment, onDelete, onClose },
+  { mode, quote, initialColor, initialComment = "", error, busy, onPickColor, onSaveComment, onDelete, onClose, extra = null },
   ref
 ) {
   const [comment, setComment] = useState(initialComment || "");
@@ -49,6 +49,7 @@ const HighlightBar = forwardRef(function HighlightBar(
           </button>
         ))}
       </div>
+      {editing && extra}
       <label className="hl-comment">
         <span>Comment (optional)</span>
         <textarea

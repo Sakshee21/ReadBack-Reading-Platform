@@ -44,6 +44,7 @@ class BookOut(BaseModel):
     status: str = "ready"
     failure_reason: str | None = None
     theme_tagging_consent: bool = False
+    published_year: int | None = None
     theme_tagging_enabled: bool = False  # on-demand tagging is on (an upload with its owner's consent)
 
     class Config:
@@ -262,6 +263,11 @@ class HighlightPatch(BaseModel):
         return self
 
 
+class ThemeRef(BaseModel):
+    theme: str
+    label: str
+
+
 class HighlightOut(BaseModel):
     id: int
     book_id: int
@@ -279,5 +285,7 @@ class HighlightOut(BaseModel):
     context_after: str
     color: str
     comment: str | None
+    # Themes of the passage (score 3 or more, best first), for citing and export.
+    themes: list[ThemeRef] = []
     created_at: dt.datetime
     updated_at: dt.datetime

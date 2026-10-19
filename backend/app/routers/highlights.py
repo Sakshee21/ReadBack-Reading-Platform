@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.deps import book_for_user, get_current_user
-from app.models import Book, Chapter, Highlight, MicroSession, User
+from app.models import Book, Chapter, Highlight, MicroSession, MicroSessionTheme, User
 from app.schemas import HighlightIn, HighlightOut, HighlightPatch
+from app.services.themes import MIN_SHOWN_SCORE, THEMES, reached_micro_session_ids
 
 router = APIRouter(tags=["highlights"])
 
@@ -26,7 +27,32 @@ def _session_numbers(db: Session, book: Book) -> dict[int, int]:
     return {row[0]: n for n, row in enumerate(rows, start=1)}
 
 
-def _out(h: Highlight, chapter: Chapter, ms: MicroSession, numbers: dict[int, int]) -> HighlightOut:
+def _themes_for(db: Session, user: User, book: Book, micro_session_ids: set[int]) -> dict[int, list[dict]]:
+    """micro-session id -> its themes worth showing, best first. Only passages the
+    reader has reached: a tag on a later one could give the plot away."""
+    micro_session_ids = micro_session_ids & reached_micro_session_ids(db, user, book)
+    if not micro_session_ids:
+        return {}
+    rows = (
+        db.query(MicroSessionTheme)
+        .filter(
+            MicroSessionTheme.micro_session_id.in_(micro_session_ids),
+            MicroSessionTheme.score >= MIN_SHOWN_SCORE,
+            MicroSessionTheme.theme.in_(list(THEMES)),
+        )
+        .all()
+    )
+    order = list(THEMES)
+    rows.sort(key=lambda r: (-r.score, order.index(r.theme)))
+    out: dict[int, list[dict]] = {}
+    for r in rows:
+        out.setdefault(r.micro_session_id, []).append({"theme": r.theme, "label": THEMES[r.theme]})
+    return out
+
+
+def _out(
+    h: Highlight, chapter: Chapter, ms: MicroSession, numbers: dict[int, int], themes: list[dict] | None = None
+) -> HighlightOut:
     return HighlightOut(
         id=h.id,
         book_id=h.book_id,
@@ -42,6 +68,7 @@ def _out(h: Highlight, chapter: Chapter, ms: MicroSession, numbers: dict[int, in
         context_after=h.context_after,
         color=h.color,
         comment=h.comment,
+        themes=themes or [],
         created_at=h.created_at,
         updated_at=h.updated_at,
     )
@@ -108,7 +135,7 @@ def create_highlight(
     db.add(row)
     db.commit()
     db.refresh(row)
-    return _out(row, chapter, ms, _session_numbers(db, book))
+    return _out(row, chapter, ms, _session_numbers(db, book), _themes_for(db, user, book, {ms.id}).get(ms.id))
 
 
 @router.get("/books/{book_id}/highlights", response_model=list[HighlightOut])
@@ -129,7 +156,8 @@ def list_highlights(
         query = query.filter(Highlight.micro_session_id == micro_session_id)
     rows = query.order_by(Chapter.index, MicroSession.index, Highlight.start).all()
     numbers = _session_numbers(db, book)
-    return [_out(h, c, m, numbers) for h, c, m in rows]
+    found = _themes_for(db, user, book, {m.id for _h, _c, m in rows})
+    return [_out(h, c, m, numbers, found.get(m.id)) for h, c, m in rows]
 
 
 @router.patch("/highlights/{highlight_id}", response_model=HighlightOut)
@@ -148,7 +176,14 @@ def update_highlight(
     db.commit()
     db.refresh(row)
     ms = db.get(MicroSession, row.micro_session_id)
-    return _out(row, db.get(Chapter, ms.chapter_id), ms, _session_numbers(db, db.get(Book, row.book_id)))
+    book = db.get(Book, row.book_id)
+    return _out(
+        row,
+        db.get(Chapter, ms.chapter_id),
+        ms,
+        _session_numbers(db, book),
+        _themes_for(db, user, book, {ms.id}).get(ms.id),
+    )
 
 
 @router.delete("/highlights/{highlight_id}", status_code=204)

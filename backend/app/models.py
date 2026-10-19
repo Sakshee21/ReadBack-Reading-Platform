@@ -43,6 +43,8 @@ class Book(Base):
     gutenberg_id: Mapped[int | None] = mapped_column(Integer, unique=True, index=True, nullable=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     author: Mapped[str] = mapped_column(String(255), nullable=False)
+    # Year of first publication, used in citations. Null for uploads.
+    published_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
     full_text: Mapped[str] = mapped_column(Text, nullable=False)
     total_word_count: Mapped[int] = mapped_column(Integer, default=0)
 

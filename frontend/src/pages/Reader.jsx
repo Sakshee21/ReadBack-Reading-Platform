@@ -544,6 +544,7 @@ export default function Reader() {
                   onChanged={(rows) => replaceForPart(part.id, rows)}
                   focusHighlightId={focusHighlightId}
                   onFocused={clearFocusHighlight}
+                  book={position.book}
                 />
               ))}
             </div>

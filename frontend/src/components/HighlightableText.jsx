@@ -3,6 +3,7 @@ import { api, logEvent } from "../api";
 import { HIGHLIGHT_COLORS, colorLabel } from "../highlights/constants";
 import { isStale, paragraphStarts, selectionToRange, splitSegments } from "../highlights/positions";
 import HighlightBar from "./HighlightBar";
+import CiteControl from "./CiteControl";
 
 const OVERLAP_MESSAGE = "That overlaps an existing highlight. Select it to edit instead.";
 const SAVE_FAILED = "Could not save that highlight. Try again.";
@@ -23,6 +24,7 @@ export default function HighlightableText({
   onChanged,
   focusHighlightId = null,
   onFocused,
+  book = null,
 }) {
   const textRef = useRef(null);
   const barRef = useRef(null);
@@ -232,6 +234,7 @@ export default function HighlightableText({
           quote={editing?.quote}
           initialColor={editing?.color}
           initialComment={editing?.comment || ""}
+          extra={editing && book ? <CiteControl book={book} highlight={editing} bookId={bookId} /> : null}
           error={error}
           busy={busy}
           onPickColor={(color, comment) => (editing ? update({ color }) : create(color, comment))}

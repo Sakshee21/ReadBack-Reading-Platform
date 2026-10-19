@@ -261,24 +261,28 @@ SEED_BOOKS = [
     {
         "gutenberg_id": 1952,
         "theme": "faded",
+        "published_year": 1892,  # first publication, cited as such
         "chapter_summaries": YELLOW_WALLPAPER_SUMMARIES,
         "checkpoints": [],
     },
     {
         "gutenberg_id": 11,
         "theme": "meadow",
+        "published_year": 1865,  # first publication, cited as such
         "chapter_summaries": ALICE_SUMMARIES,
         "checkpoints": [{"chapter_index_trigger": 9, "questions": ALICE_CHECKPOINT_QUESTIONS}],
     },
     {
         "gutenberg_id": 74,
         "theme": "sunlit",
+        "published_year": 1876,  # first publication, cited as such
         "chapter_summaries": {},
         "checkpoints": [{"chapter_index_trigger": 9, "questions": TOM_SAWYER_CHECKPOINT_QUESTIONS}],
     },
     {
         "gutenberg_id": 84,
         "theme": "moonlit",
+        "published_year": 1818,  # first publication, cited as such
         "chapter_summaries": {},
         # Index 8 (not 5): chapter 0 is the framing letters, so index N is
         # Chapter N. Trigger 5 fired *before* the creature was animated in
@@ -289,6 +293,7 @@ SEED_BOOKS = [
     {
         "gutenberg_id": 1342,
         "theme": "rose",
+        "published_year": 1813,  # first publication, cited as such
         "chapter_summaries": {},
         # Index 15 (not 9) because chapter 0 here is front-matter (a preface),
         # shifting every real chapter's index up by one - and because the
@@ -322,6 +327,7 @@ def seed():
         try:
             book = db.get(Book, book_id)
             book.theme = entry["theme"]
+            book.published_year = entry["published_year"]
 
             # Mark hand-authored chapters as 'manual' so the recap engine keeps
             # preferring them over any LLM recap. Done here (not only at import)

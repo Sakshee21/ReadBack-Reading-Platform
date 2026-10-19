@@ -60,6 +60,7 @@ def _book_out(book: Book, tagging_enabled: bool = False) -> BookOut:
         status=book.status,
         failure_reason=book.failure_reason,
         theme_tagging_consent=bool(book.theme_tagging_consent),
+        published_year=book.published_year,
         theme_tagging_enabled=tagging_enabled,
     )
 
