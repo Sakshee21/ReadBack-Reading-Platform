@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, fireEvent, cleanup, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import NotesPage from "./NotesPage";
+import { SettingsProvider } from "../SettingsContext";
 
 const logged = [];
 const api = {
@@ -39,6 +40,15 @@ const hl = (over) => ({
   ...over,
 });
 
+const BOOK = {
+  id: 2,
+  title: "Alice's Adventures",
+  author: "Carroll, Lewis",
+  published_year: 1865,
+  gutenberg_id: 11,
+  is_user_uploaded: false,
+};
+
 const DATA = [
   hl({ id: 1 }),
   hl({ id: 2, micro_session_id: 101, session_number: 4, start: 40, quote: "the White Rabbit", color: "blue", comment: "key moment" }),
@@ -47,12 +57,14 @@ const DATA = [
 
 function setup(rows = DATA) {
   api.listHighlights.mockResolvedValue(rows);
-  api.listBooks.mockResolvedValue([{ id: 2, title: "Alice's Adventures" }]);
+  api.listBooks.mockResolvedValue([BOOK]);
   return render(
     <MemoryRouter initialEntries={["/books/2/notes"]}>
-      <Routes>
-        <Route path="/books/:bookId/notes" element={<NotesPage />} />
-      </Routes>
+      <SettingsProvider>
+        <Routes>
+          <Route path="/books/:bookId/notes" element={<NotesPage />} />
+        </Routes>
+      </SettingsProvider>
     </MemoryRouter>
   );
 }
@@ -64,6 +76,17 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("NotesPage", () => {
+  it("each_note_has_a_cite_button_that_opens_the_copy_options", async () => {
+    setup();
+    const cards = (await screen.findAllByTestId("note-quote")).map((q) => q.closest("article"));
+    expect(screen.queryByRole("button", { name: "Copy quote with citation" })).toBeNull();
+    fireEvent.click(within(cards[1]).getByRole("button", { name: "Cite" }));
+    expect(within(cards[1]).getByRole("button", { name: "Copy quote with citation" })).toBeTruthy();
+    expect(within(cards[0]).queryByRole("button", { name: "Copy quote with citation" })).toBeNull();
+    fireEvent.click(within(cards[1]).getByRole("button", { name: "Cite" }));
+    expect(within(cards[1]).queryByRole("button", { name: "Copy quote with citation" })).toBeNull();
+  });
+
   it("groups_by_chapter_in_reading_order", async () => {
     setup([DATA[2], DATA[1], DATA[0]]);
     const headings = await screen.findAllByRole("heading", { level: 2 });
@@ -181,6 +204,62 @@ describe("NotesPage", () => {
     click.mockRestore();
   });
 
+  function captureDownload() {
+    let blob = null;
+    let name = null;
+    URL.createObjectURL = vi.fn((b) => {
+      blob = b;
+      return "blob:x";
+    });
+    URL.revokeObjectURL = vi.fn();
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function () {
+      name = this.download;
+    });
+    return { get: () => ({ blob, name }), done: () => click.mockRestore() };
+  }
+  const readText = (blob) =>
+    new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.readAsText(blob);
+    });
+
+  it("markdown_export_now_carries_citations_and_a_reference_and_logs_format_and_style", async () => {
+    setup();
+    await screen.findByText("key moment");
+    const dl = captureDownload();
+    fireEvent.click(screen.getByRole("button", { name: "Export as Markdown" }));
+    const text = await readText(dl.get().blob);
+    expect(text).toContain("(Carroll, 1865,");
+    expect(text).toContain("## Reference");
+    expect(logged.find((e) => e.type === "notes_exported")).toMatchObject({ format: "markdown", style: "apa" });
+    dl.done();
+  });
+
+  it("csv_export_downloads_a_bom_prefixed_file_with_the_chosen_style", async () => {
+    setup();
+    await screen.findByText("key moment");
+    fireEvent.change(screen.getByLabelText("Export citation style"), { target: { value: "mla" } });
+    const dl = captureDownload();
+    fireEvent.click(screen.getByRole("button", { name: "Export as CSV" }));
+    const { blob, name } = dl.get();
+    expect(name).toBe("Alice's Adventures - notes.csv");
+    const bytes = new Uint8Array(
+      await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsArrayBuffer(blob);
+      })
+    );
+    expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+    const text = await readText(blob);
+    expect(text).toContain("book,author,chapter,chapter_title,quote");
+    expect(text).toContain("(Carroll, “Down the Rabbit-Hole”)");
+    expect(text).not.toContain("1865,");
+    expect(logged.find((e) => e.type === "notes_exported")).toMatchObject({ format: "csv", style: "mla", count: 3 });
+    dl.done();
+  });
+
   it("notes_opened_logged_once_with_count", async () => {
     setup();
     await screen.findByText("key moment");
@@ -190,6 +269,23 @@ describe("NotesPage", () => {
     ]);
   });
 
+  it("exports_still_work_when_the_book_is_missing_from_the_library_list", async () => {
+    api.listBooks.mockResolvedValue([]);
+    setup();
+    await screen.findByText("key moment");
+    const dl = captureDownload();
+    fireEvent.click(screen.getByRole("button", { name: "Export as CSV" }));
+    const csvText = await readText(dl.get().blob);
+    expect(csvText).toContain("book,author,chapter,chapter_title,quote");
+    expect(csvText).toContain("key moment");
+    dl.done();
+
+    const dl2 = captureDownload();
+    fireEvent.click(screen.getByRole("button", { name: "Export as Markdown" }));
+    expect(await readText(dl2.get().blob)).toContain("key moment");
+    dl2.done();
+  });
+
   it("load_failure_shows_a_message", async () => {
     api.listBooks.mockResolvedValue([]);
     api.listHighlights.mockImplementation(() => {
@@ -197,9 +293,11 @@ describe("NotesPage", () => {
     });
     render(
       <MemoryRouter initialEntries={["/books/2/notes"]}>
-        <Routes>
-          <Route path="/books/:bookId/notes" element={<NotesPage />} />
-        </Routes>
+        <SettingsProvider>
+          <Routes>
+            <Route path="/books/:bookId/notes" element={<NotesPage />} />
+          </Routes>
+        </SettingsProvider>
       </MemoryRouter>
     );
     expect(await screen.findByRole("alert")).toBeTruthy();

@@ -303,6 +303,27 @@ withdrawing consent cannot unsend text already sent.
 
 ---
 
+### G6. Reading for research -> *see the pattern, cite it, take it out*
+For people who use ReadBack to read for a paper or a course.
+
+- **Theme map.** On a book's Themes page, a strip chart shows where each theme
+  appears across the book (darker = stronger), with chapter markers. Click a
+  square to open that passage. By default it shows only what you have read;
+  *Show the whole book* asks first (it can spoil the story) and is never
+  remembered.
+- **Cite and quote.** Open a highlight (in the Reader, or *Cite* on the Notes
+  page) and copy the quote with its citation, the in-text citation alone, or
+  the reference entry, in APA 7, MLA 9 or Chicago 17. Titles keep their italics
+  when pasted into Word. Optionally add a link back to the exact passage. The
+  locator is the chapter, because an ebook has no stable page numbers.
+- **Export notes.** The Notes page exports Markdown (each note with its
+  citation and the passage's themes, plus a reference entry) or CSV for a
+  spreadsheet (UTF-8, formula-safe). The citation style is the one chosen on the
+  page.
+- Publication years used in citations come from the seed data. To add them to an
+  existing database: `python -m scripts.seed_books` (no download for books that
+  are already imported). Uploads have no year, so they are cited as "n.d.".
+
 ### H. The research layer → *close here*
 **Do:** open in the second tab:
 ```

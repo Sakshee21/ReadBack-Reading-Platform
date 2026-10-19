@@ -52,7 +52,7 @@ describe("notes export", () => {
       bookTitle: "T",
       highlights: [h({ chapter_title: "", chapter_index: 3, session_number: null })],
     });
-    expect(md).toContain("## Chapter 3");
+    expect(md).toContain("## Section 4");
     expect(md).toContain("Yellow\n");
     expect(md).not.toMatch(/Session/);
   });
@@ -88,5 +88,61 @@ describe("notes export", () => {
     expect(notesFileName('A/B\\C:D*E?"F<G>H|')).toBe("A B C D E F G H - notes.md");
     expect(notesFileName("   ")).toBe("Book - notes.md");
     expect(notesFileName(undefined)).toBe("Book - notes.md");
+  });
+});
+
+describe("cited markdown export", () => {
+  const book = {
+    title: "Alice's Adventures in Wonderland",
+    author: "Carroll, Lewis",
+    published_year: 1865,
+    gutenberg_id: 11,
+    is_user_uploaded: false,
+  };
+  const two = [
+    h({ id: 1, chapter_title: "Chapter 1", themes: [{ theme: "romance", label: "Romance & courtship" }, { theme: "war_conflict", label: "War & conflict" }] }),
+    h({ id: 2, start: 50, chapter_title: "Chapter 1", quote: "later", themes: [] }),
+  ];
+
+  it("apa_adds_an_in_text_citation_themes_and_one_reference_entry", () => {
+    const md = buildNotesMarkdown({ bookTitle: book.title, highlights: two, book, style: "apa" });
+    expect(md).toContain("> Alice was beginning\n\n(Carroll, 1865, Chapter 1)\n\nYellow · Session 4 · Themes: Romance & courtship, War & conflict");
+    expect(md).toContain("> later\n\n(Carroll, 1865, Chapter 1)\n\nYellow · Session 4\n");
+    expect(md.split("## Reference").length).toBe(2);
+    expect(md.trimEnd().endsWith("Carroll, L. (1865). *Alice's Adventures in Wonderland*. Project Gutenberg. https://www.gutenberg.org/ebooks/11")).toBe(true);
+  });
+
+  it("mla_uses_its_in_text_form", () => {
+    const md = buildNotesMarkdown({ bookTitle: book.title, highlights: two, book, style: "mla" });
+    expect(md).toContain("(Carroll, ch. 1)");
+    expect(md).toContain("Carroll, Lewis. *Alice's Adventures in Wonderland*. 1865. *Project Gutenberg*, www.gutenberg.org/ebooks/11.");
+  });
+
+  it("chicago_puts_the_footnote_under_each_quote", () => {
+    const md = buildNotesMarkdown({ bookTitle: book.title, highlights: two, book, style: "chicago" });
+    expect(md).toContain("Lewis Carroll, *Alice's Adventures in Wonderland* (1865; Project Gutenberg), chap. 1.");
+  });
+
+  it("without_a_book_the_old_output_is_unchanged", () => {
+    const old = buildNotesMarkdown({ bookTitle: "T", highlights: two });
+    expect(old).not.toContain("## Reference");
+    expect(old).not.toContain("Themes:");
+  });
+
+  it("a_lead_in_chapter_is_headed_opening_section_not_chapter_0", () => {
+    const md = buildNotesMarkdown({ bookTitle: "T", highlights: [h({ chapter_title: "", chapter_index: 0 })] });
+    expect(md).toContain("## Opening section");
+    expect(md).not.toContain("Chapter 0");
+  });
+
+  it("comment_lines_that_would_become_rules_or_setext_headings_are_escaped", () => {
+    const md = buildNotesMarkdown({ bookTitle: "T", highlights: [h({ comment: "my thought\n---\nnext\n===" })] });
+    expect(md).toContain("my thought\n\\---\nnext\n\\===");
+  });
+
+  it("a_comment_still_follows_the_citation_and_is_escaped", () => {
+    const md = buildNotesMarkdown({ bookTitle: book.title, highlights: [h({ comment: "# not a heading" })], book, style: "apa" });
+    expect(md).toContain("\\# not a heading");
+    expect(md.indexOf("(Carroll")).toBeLessThan(md.indexOf("\\# not a heading"));
   });
 });

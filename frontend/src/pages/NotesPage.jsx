@@ -3,6 +3,10 @@ import { Link, useParams } from "react-router-dom";
 import { api, logEvent } from "../api";
 import { HIGHLIGHT_COLORS, colorLabel } from "../highlights/constants";
 import { buildNotesMarkdown, chapterHeading, notesFileName } from "../highlights/exportMarkdown";
+import { buildNotesCsv, notesCsvFileName } from "../highlights/exportCsv";
+import { STYLES } from "../citations/format";
+import { useSettings } from "../SettingsContext";
+import CiteControl from "../components/CiteControl";
 
 const hueOf = (id) => HIGHLIGHT_COLORS.find((c) => c.id === id)?.hue;
 const plural = (n) => `${n} highlight${n === 1 ? "" : "s"}`;
@@ -12,12 +16,15 @@ export default function NotesPage() {
   const numericBookId = Number(bookId);
   const [highlights, setHighlights] = useState([]);
   const [bookTitle, setBookTitle] = useState("");
+  const [book, setBook] = useState(null);
+  const [citingId, setCitingId] = useState(null);
   const [status, setStatus] = useState("loading"); // loading | ready | failed
   const [filter, setFilter] = useState("all");
   const [editing, setEditing] = useState(null); // {id, color, comment}
   const [confirmingId, setConfirmingId] = useState(null);
   const [actionError, setActionError] = useState("");
   const openedLogged = useRef(false);
+  const { citationStyle, setCitationStyle } = useSettings();
   const busyRef = useRef(false); // one save/delete at a time, whatever the clicks
 
   useEffect(() => {
@@ -27,7 +34,9 @@ export default function NotesPage() {
         const [rows, books] = await Promise.all([api.listHighlights(bookId), api.listBooks()]);
         if (!current) return;
         setHighlights(rows);
-        setBookTitle(books.find((b) => b.id === numericBookId)?.title || "");
+        const found = books.find((b) => b.id === numericBookId) || null;
+        setBook(found);
+        setBookTitle(found?.title || "");
         setStatus("ready");
         if (!openedLogged.current) {
           openedLogged.current = true;
@@ -101,18 +110,28 @@ export default function NotesPage() {
     }
   }
 
-  function exportMarkdown() {
-    const markdown = buildNotesMarkdown({ bookTitle, highlights });
-    const url = URL.createObjectURL(new Blob([markdown], { type: "text/markdown;charset=utf-8" }));
+  function download(fileName, blob, format) {
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = notesFileName(bookTitle);
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     link.remove();
     // Some browsers cancel the download if the URL goes away during the click.
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    logEvent("notes_exported", { bookId: numericBookId, count: highlights.length });
+    logEvent("notes_exported", { bookId: numericBookId, count: highlights.length, format, style: citationStyle });
+  }
+
+  function exportMarkdown() {
+    const markdown = buildNotesMarkdown({ bookTitle, highlights, book, style: citationStyle });
+    download(notesFileName(bookTitle), new Blob([markdown], { type: "text/markdown;charset=utf-8" }), "markdown");
+  }
+
+  function exportCsv() {
+    // The byte order mark makes Excel read the file as UTF-8.
+    const csv = buildNotesCsv({ book: book || { title: bookTitle, author: "" }, style: citationStyle, highlights });
+    download(notesCsvFileName(bookTitle), new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }), "csv");
   }
 
   if (status === "loading") return <div className="page-loading">Loading your notes...</div>;
@@ -169,8 +188,21 @@ export default function NotesPage() {
               ))}
             </fieldset>
             <span>{filter === "all" ? plural(highlights.length) : `Showing ${visible.length} of ${highlights.length}`}</span>
+            <label className="cite-style">
+              <span>Export citation style</span>
+              <select value={citationStyle} onChange={(e) => setCitationStyle(e.target.value)}>
+                {STYLES.map((id) => (
+                  <option key={id} value={id}>
+                    {{ apa: "APA 7", mla: "MLA 9", chicago: "Chicago 17" }[id]}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button type="button" className="btn-secondary" onClick={exportMarkdown}>
               Export as Markdown
+            </button>
+            <button type="button" className="btn-secondary" onClick={exportCsv}>
+              Export as CSV
             </button>
           </div>
           {actionError && <p role="alert" className="hl-error">{actionError}</p>}
@@ -251,6 +283,16 @@ export default function NotesPage() {
                         >
                           Edit
                         </button>
+                        {book && (
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            aria-expanded={citingId === h.id}
+                            onClick={() => setCitingId(citingId === h.id ? null : h.id)}
+                          >
+                            Cite
+                          </button>
+                        )}
                         {confirmingId === h.id ? (
                           <>
                             <button type="button" className="btn-secondary hl-danger" onClick={() => remove(h.id)}>
@@ -266,6 +308,7 @@ export default function NotesPage() {
                           </button>
                         )}
                       </div>
+                      {book && citingId === h.id && <CiteControl book={book} highlight={h} bookId={numericBookId} />}
                     </>
                   )}
                 </article>
