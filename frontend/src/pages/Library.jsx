@@ -146,7 +146,7 @@ export default function Library() {
     <div className="library-page">
       <div className="library-header">
         <h1>Your library</h1>
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+        <div className="library-actions">
           <StreakDisplay streak={streak} />
           <button className="btn-secondary" onClick={() => setUploadOpen(true)}>
             <Icon name="upload" />
@@ -324,22 +324,22 @@ function BookCard({
         <div className="book-card is-unavailable">{inner}</div>
       )}
       {ready && (
-        <Link
-          to={`/books/${book.id}/notes`}
-          className={`book-notes${book.is_user_uploaded ? " has-delete" : ""}`}
-          aria-label={`Notes for ${book.title}`}
-        >
-          Notes
-        </Link>
-      )}
-      {ready && (
-        <ShelfMenu
-          book={book}
-          shelves={shelves}
-          onAdd={onAddToShelf}
-          onRemove={onRemoveFromShelf}
-          onCreate={onCreateShelf}
-        />
+        <div className="book-actions">
+          <ShelfMenu
+            book={book}
+            shelves={shelves}
+            onAdd={onAddToShelf}
+            onRemove={onRemoveFromShelf}
+            onCreate={onCreateShelf}
+          />
+          <Link
+            to={`/books/${book.id}/notes`}
+            className="book-notes"
+            aria-label={`Notes for ${book.title}`}
+          >
+            Notes
+          </Link>
+        </div>
       )}
       {book.is_user_uploaded && (
         <button
