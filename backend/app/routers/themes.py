@@ -100,7 +100,12 @@ def theme_map(
         else:
             chapters.append({"index": chapter.index, "title": chapter.title, "start": i, "end": i})
 
-    visible = set(position) if reveal == "all" else theme_service.reached_micro_session_ids(db, user, book)
+    # Always worked out, even when revealing: the map scales itself to how far
+    # the reader has got, and that has to be a server-side number for the same
+    # reason the tags are - a client cannot be trusted to decide what counts as
+    # reached.
+    reached_ids = theme_service.reached_micro_session_ids(db, user, book)
+    visible = set(position) if reveal == "all" else reached_ids
     by_theme: dict[str, list[dict]] = {}
     for row in _shown(db, visible):
         by_theme.setdefault(row.theme, []).append(
@@ -112,7 +117,16 @@ def theme_map(
         for t, cells in by_theme.items()
     ]
     listing.sort(key=lambda item: (-item["count"], order.index(item["theme"])))
-    return {"reveal": reveal == "all", "total": len(ordered), "chapters": chapters, "themes": listing}
+    # ``reached`` is how many chunks from the start the reader has got through,
+    # so the client can fit the chart to that range. The reached set is always a
+    # prefix, so its size is also the exclusive end of the range.
+    return {
+        "reveal": reveal == "all",
+        "total": len(ordered),
+        "reached": len(reached_ids),
+        "chapters": chapters,
+        "themes": listing,
+    }
 
 
 @router.get("/books/{book_id}/themes/{theme}")

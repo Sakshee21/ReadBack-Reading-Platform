@@ -16,3 +16,6 @@ pytest==8.3.3
 ebooklib==0.18
 beautifulsoup4==4.12.3
 pypdf==5.1.0
+# Research documents: layout-aware PDF extraction (two-column papers,
+# textbook outlines). MIT-licensed; PyMuPDF would also do this but is AGPL.
+pdfminer.six==20231228

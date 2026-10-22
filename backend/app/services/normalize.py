@@ -111,6 +111,24 @@ def _join_wrapped(lines: list[str]) -> str:
     return out
 
 
+def join_wrapped_lines(lines: list[str]) -> str:
+    """Join hard-wrapped lines into one paragraph (see ``_join_wrapped``).
+
+    Public so the research extractor can reuse the end-of-line hyphen rule
+    rather than keeping a second copy of it.
+    """
+    return _join_wrapped(lines)
+
+
+def merge_split_paragraphs(paragraphs: list[str]) -> list[str]:
+    """Rejoin paragraphs broken mid-sentence (see ``_merge_continuations``).
+
+    Public for the research extractor, where the break comes from a page or
+    column boundary rather than an EPUB extractor.
+    """
+    return _merge_continuations(paragraphs)
+
+
 def _split_on_indent(lines: list[str]) -> list[list[str]]:
     """Split a run of lines that uses indentation instead of blank lines.
 

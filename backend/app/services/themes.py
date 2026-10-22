@@ -210,12 +210,23 @@ def _content_of(body) -> str:
     return body["choices"][0]["message"]["content"]
 
 
-def call_model(client: httpx.Client, text: str, config: LLMConfig | None = None) -> str:
+def call_model(
+    client: httpx.Client,
+    text: str,
+    config: LLMConfig | None = None,
+    payload_for=None,
+) -> str:
     """One chat completion; returns the reply content. Retries rate limits,
     server errors and dropped connections with backoff, then raises
-    ThemeProviderError. Never puts the key or the passage in an error or log."""
+    ThemeProviderError. Never puts the key or the passage in an error or log.
+
+    ``payload_for`` is the request builder, defaulting to theme tagging. The
+    research tagger passes its own so that the transport - backoff, Retry-After
+    handling, both providers response shapes - has one implementation rather
+    than two.
+    """
     config = config or current_config()
-    payload = _payload(config, text)
+    payload = (payload_for or _payload)(config, text)
     last = "no attempt"
     for attempt in range(1, MAX_ATTEMPTS + 1):
         wait = min(5.0 * attempt, 30.0)
@@ -330,7 +341,10 @@ def tag_chunk(db: Session, micro_session: MicroSession, *, client, provider=None
 def tagging_enabled(db: Session, user: User, book: Book) -> bool:
     """Is on-demand tagging switched on for this reader and book? Only for the
     owner's own upload, and only with their consent. Seeded books ship with their
-    tags and are never tagged on demand."""
+    tags and are never tagged on demand, and a research document is tagged from
+    its own list by services/research_tags - never from the literary one."""
+    if (book.source_type or "") == "research":
+        return False
     return bool(book.is_user_uploaded and book.theme_tagging_consent and book.owner_user_id == user.id)
 
 

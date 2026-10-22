@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import SessionLocal, get_db
-from app.deps import book_for_user, get_current_user
+from app.deps import RESEARCH, book_for_user, get_current_user
 from app.services import themes as theme_service
 from app.models import (
     Book,
@@ -67,10 +67,17 @@ def _book_out(book: Book, tagging_enabled: bool = False) -> BookOut:
 
 @router.get("", response_model=list[BookOut])
 def list_books(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    """Shared seeded books plus this user's own uploads - never anyone else's."""
+    """Shared seeded books plus this user's own uploads - never anyone else's.
+
+    Research documents live in their own library (/research) and are left out
+    here, so the reading-habit track never shows a paper or a textbook.
+    """
     books = (
         db.query(Book)
-        .filter(or_(Book.owner_user_id.is_(None), Book.owner_user_id == user.id))
+        .filter(
+            or_(Book.owner_user_id.is_(None), Book.owner_user_id == user.id),
+            Book.source_type != RESEARCH,
+        )
         .order_by(Book.title)
         .all()
     )

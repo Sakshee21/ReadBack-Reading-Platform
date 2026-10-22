@@ -34,7 +34,7 @@ const BOOK = { id: 2, title: "Alice", is_user_uploaded: false, theme_tagging_con
 
 function setup({ themes = THEMES, book = BOOK } = {}) {
   api.getThemes.mockResolvedValue(themes);
-  api.getThemeMap.mockResolvedValue({ reveal: false, total: 2, chapters: [{ index: 1, title: "Chapter 1", start: 0, end: 1 }], themes: [{ theme: "romance", label: "Romance & courtship", count: 1, cells: [{ pos: 0, micro_session_id: 11, score: 5 }] }] });
+  api.getThemeMap.mockResolvedValue({ reveal: false, total: 2, reached: 2, chapters: [{ index: 1, title: "Chapter 1", start: 0, end: 1 }], themes: [{ theme: "romance", label: "Romance & courtship", count: 1, cells: [{ pos: 0, micro_session_id: 11, score: 5 }] }] });
   api.getThemePassages.mockResolvedValue(PASSAGES);
   api.listBooks.mockResolvedValue([book]);
   return render(
@@ -143,7 +143,9 @@ describe("ThemesPage", () => {
     setup();
     expect(await screen.findByRole("heading", { name: "Theme map" })).toBeTruthy();
     expect(await screen.findByRole("group", { name: "Romance & courtship: 1 passage" })).toBeTruthy();
-    expect(api.getThemeMap).toHaveBeenCalledWith("2", false);
+    // No reveal argument any more: the map asks for what the reader has
+    // reached and nothing else, and redraws that at either scale.
+    expect(api.getThemeMap).toHaveBeenCalledWith("2");
   });
 
   it("links_back_to_reading_and_notes", async () => {

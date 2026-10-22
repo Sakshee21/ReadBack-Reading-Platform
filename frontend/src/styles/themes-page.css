@@ -52,16 +52,48 @@
 
 /* theme map */
 .theme-map { margin: 20px 0; }
-.map-scroll { overflow-x: auto; padding-bottom: 6px; }
+/* The chart scrolls sideways rather than squeezing its squares: below about
+   6px a passage square is neither visible nor clickable, and a long book has
+   far more passages than there are pixels. Focusable so the scrollbar can be
+   driven from the keyboard. */
+.map-scroll { overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.map-scroll:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+/* The rules layer is positioned against this, so it covers every row. */
+.map-plot { position: relative; }
 .map-row { display: grid; grid-template-columns: 9.5rem minmax(320px, 1fr); align-items: center; gap: 8px; margin: 4px 0; min-width: 480px; }
-.map-label { font-size: 0.85rem; }
+.map-label { font-size: 0.85rem; position: relative; z-index: 1; }
 .map-grid { display: grid; align-items: stretch; background: var(--surface); border-radius: 4px; min-height: 1.4rem; }
 .map-chapters { margin-left: calc(9.5rem + 8px); min-width: 320px; background: none; min-height: 1.1rem; }
-.map-chapter { font-size: 0.7rem; opacity: 0.75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 1px solid var(--text-muted); padding-left: 3px; }
-.map-cell { display: block; align-self: end; background: var(--text); }
-/* strength is shown by height as well as by darkness, so it survives low contrast */
-.map-score-3 { height: 0.6rem; opacity: 0.55; }
-.map-score-4 { height: 1rem; opacity: 0.78; }
-.map-score-5 { height: 1.4rem; opacity: 1; }
+/* Short labels ("Ch 12"), thinned in the component so two never collide. The
+   full title is the hover text, and is in every square's accessible name. */
+.map-chapter { font-size: 0.7rem; opacity: 0.75; white-space: nowrap; overflow: hidden; padding-left: 3px; align-self: end; }
+
+/* Chapter boundaries: one subtle line per chapter, behind the rows. */
+.map-rules { position: absolute; left: calc(9.5rem + 8px); right: 0; top: 1.1rem; bottom: 0; display: grid; pointer-events: none; }
+.map-rule { border-left: 1px solid var(--border); }
+
+/* Strength is carried by height first and darkness second, so it survives a
+   palette whose text colour is only just legible.
+
+   The fill is mixed towards the surface rather than dimmed with `opacity`,
+   and every square keeps a full-strength top edge. That edge is what makes
+   the promise hold: whatever the fill is mixed down to, each square is still
+   outlined at exactly the palette's text-on-surface contrast, which the
+   palette guard already enforces. `opacity` could not promise that - it dims
+   the edge along with the fill. */
+.map-cell { display: block; align-self: end; background: var(--text); border-top: 1px solid var(--text); position: relative; z-index: 1; }
+.map-score-3 { height: 0.6rem; background: color-mix(in srgb, var(--text) 62%, var(--surface)); }
+.map-score-4 { height: 1rem; background: color-mix(in srgb, var(--text) 82%, var(--surface)); }
+.map-score-5 { height: 1.4rem; background: var(--text); }
 .map-cell:hover, .map-cell:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
-.map-reveal { margin-top: 10px; }
+
+/* Key to the three strengths, so "darker means stronger" has something to
+   read it against. */
+.map-key { display: flex; flex-wrap: wrap; gap: 12px; list-style: none; margin: 6px 0 10px; padding: 0; font-size: 0.75rem; color: var(--text-muted); }
+.map-key li { display: flex; align-items: center; gap: 5px; }
+.map-key-swatch { display: inline-block; width: 10px; border-top: 1px solid var(--text); background: var(--text); }
+
+.map-controls { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.map-toggle { display: flex; gap: 4px; }
+.map-toggle [aria-pressed="true"] { border-color: var(--text); font-weight: 600; }
+.map-controls button[disabled] { opacity: 0.55; cursor: default; }

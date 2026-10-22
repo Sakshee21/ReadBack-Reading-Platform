@@ -12,16 +12,22 @@ const escapeHtml = (text) =>
 /**
  * Copy a highlighted passage with its citation, or the citation alone. The
  * style is the reader's remembered choice. The quote text is never logged.
+ *
+ * `cite` and `linkTo` are overridable so the research reader can reuse this
+ * control with journal-article and textbook-chapter formats and its own route,
+ * rather than a second copy of the same UI. Both default to the book forms.
  */
-export default function CiteControl({ book, highlight, bookId }) {
+export default function CiteControl({ book, highlight, bookId, cite = citation, linkTo }) {
   const { citationStyle, setCitationStyle } = useSettings();
   const [withLink, setWithLink] = useState(false);
   const [message, setMessage] = useState("");
 
-  const link = `${window.location.origin}/read/${bookId}?ms=${highlight.micro_session_id}&h=${highlight.id}`;
+  const link = linkTo
+    ? linkTo(highlight)
+    : `${window.location.origin}/read/${bookId}?ms=${highlight.micro_session_id}&h=${highlight.id}`;
 
   function build(kind) {
-    const c = citation(citationStyle, book, highlight);
+    const c = cite(citationStyle, book, highlight);
     const quote = `“${collapse(highlight.quote)}”`;
     let text;
     let html;

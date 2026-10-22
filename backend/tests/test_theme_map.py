@@ -140,3 +140,21 @@ def test_a_second_reader_can_reveal_a_seeded_book_but_gets_nothing_extra_without
     # asking again without reveal is limited again: nothing is remembered between requests
     assert cells(get_map(client, other, book).json(), "war_conflict") is None
     assert get_map(client, other, book).json()["reveal"] is False
+
+
+def test_the_map_says_how_far_the_reader_has_reached(client, db, story):
+    """The chart fits itself to this range, so it has to come from the server -
+    a client cannot be trusted to decide what counts as reached."""
+    user, book, _chunks = story
+    body = get_map(client, user, book).json()
+    assert body["reached"] == 2  # the reader is on chunk 2 of 4
+    assert body["reached"] <= body["total"]
+
+
+def test_reached_is_unchanged_by_revealing(client, db, story):
+    """Revealing widens what is shown, not how far the reader has got."""
+    user, book, _chunks = story
+    plain = get_map(client, user, book).json()
+    revealed = get_map(client, user, book, reveal="all").json()
+    assert revealed["reached"] == plain["reached"]
+    assert revealed["total"] == plain["total"]

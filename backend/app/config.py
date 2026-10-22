@@ -34,6 +34,26 @@ class Settings(BaseSettings):
     # every Nth session rather than at every cliffhanger.
     upload_visualization_prompts: bool = True
     upload_visualization_every: int = 5
+    # Research documents (papers and textbooks). A separate track from the
+    # reading-habit pilot, so it gets its own limits: a journal PDF is heavier
+    # than a novel and a textbook is far longer, and neither is pilot content.
+    research_enabled: bool = True
+    research_max_bytes: int = 40 * 1024 * 1024
+    research_max_words: int = 2_000_000
+    research_min_words: int = 150
+    research_docs_per_user: int = 20
+    # Pages are read before anything is stored, so a runaway file is refused
+    # rather than parsed for minutes.
+    research_max_pages: int = 1500
+    # Chunks a section is cut into. Smaller than a reading micro-session: these
+    # are the units highlights anchor to and the tagger judges, not a 3-minute
+    # read. The reader always shows a whole section regardless.
+    research_chunk_min_words: int = 180
+    research_chunk_max_words: int = 320
+    # On-demand research tagging and key points, both consent-gated and off
+    # unless switched on. They use the LLM_PROVIDER settings below.
+    research_tagging_on_demand: bool = False
+    research_key_points_on_demand: bool = False
     # Unused since the recap script moved to OpenRouter (OP_API_KEY / OP_MODEL).
     # Kept so an old .env that still has GROQ_* lines keeps loading.
     groq_api_key: str = ""

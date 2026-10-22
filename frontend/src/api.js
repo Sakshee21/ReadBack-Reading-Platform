@@ -87,6 +87,10 @@ export const api = {
   deleteHighlight: (id) => request(`/highlights/${id}`, { method: "DELETE" }),
 
   getThemes: (bookId) => request(`/books/${bookId}/themes`),
+  // `reveal` asks the server for tags on passages the reader has not reached.
+  // The theme map deliberately never passes it: its scale toggle is a drawing
+  // choice, so there is nothing extra in hand to spoil the story with. Kept
+  // because the endpoint still offers it, not because anything uses it.
   getThemeMap: (bookId, reveal = false) =>
     request(`/books/${bookId}/theme-map${reveal ? "?reveal=all" : ""}`),
   getThemePassages: (bookId, theme) => request(`/books/${bookId}/themes/${theme}`),
@@ -95,7 +99,24 @@ export const api = {
     request(`/books/${bookId}/theme-consent`, { method: "PATCH", body: { granted } }),
   prefetchThemes: (bookId, microSessionId) =>
     request(`/books/${bookId}/themes/prefetch`, { method: "POST", body: { micro_session_id: microSessionId } }),
+
+  // Research track. Separate endpoints throughout: a research document is not
+  // a book and is never reachable through /books.
+  listResearch: () => request("/research"),
+  getResearchDocument: (id) => request(`/research/${id}`),
+  updateResearchMetadata: (id, body) => request(`/research/${id}`, { method: "PATCH", body }),
+  readResearchSection: (id, sectionId) => request(`/research/${id}/sections/${sectionId}`),
+  deleteResearchDocument: (id) => request(`/research/${id}`, { method: "DELETE" }),
+  setResearchConsent: (id, consent) =>
+    request(`/research/${id}/consent`, { method: "PUT", body: { consent } }),
+  getResearchTagStatus: (id) => request(`/research/${id}/tags/status`),
+  queueResearchTags: (id) => request(`/research/${id}/tags/queue`, { method: "POST" }),
+  listResearchTags: (id) => request(`/research/${id}/tags`),
+  requestKeyPoints: (id, sectionId) =>
+    request(`/research/${id}/sections/${sectionId}/key-points`, { method: "POST" }),
 };
+
+export const researchExportUrl = () => `${API_URL}/research/export/sections.csv`;
 
 /**
  * Upload a book file. Uses XMLHttpRequest rather than fetch because only XHR
@@ -140,6 +161,51 @@ export function uploadBook({ file, title, author, themeTaggingConsent = false, o
  * Never throws - a failed log must not interrupt reading - but it warns rather
  * than failing silently, since missing pilot data is a real problem.
  */
+export function uploadResearchDocument({
+  file,
+  docKind,
+  title,
+  authors,
+  year,
+  venue,
+  doi,
+  taggingConsent = false,
+  onProgress,
+}) {
+  return new Promise((resolve, reject) => {
+    const form = new FormData();
+    form.append("file", file);
+    if (docKind) form.append("doc_kind", docKind);
+    if (title) form.append("title", title);
+    if (authors) form.append("authors", authors);
+    if (year) form.append("year", String(year));
+    if (venue) form.append("venue", venue);
+    if (doi) form.append("doi", doi);
+    form.append("tagging_consent", taggingConsent ? "true" : "false");
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}/research/upload`);
+    const token = getToken();
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total);
+    };
+    xhr.onload = () => {
+      let body = {};
+      try {
+        body = JSON.parse(xhr.responseText || "{}");
+      } catch {
+        // non-JSON error body
+      }
+      if (xhr.status >= 200 && xhr.status < 300) resolve(body);
+      else reject(new ApiError(body.detail || `Upload failed (${xhr.status})`, xhr.status));
+    };
+    xhr.onerror = () => reject(new ApiError("Network error during upload", 0));
+    xhr.send(form);
+  });
+}
+
 export function logEvent(eventType, fields = {}) {
   const { bookId = null, chapterId = null, microSessionId = null, ...metadata } = fields;
   const body = {

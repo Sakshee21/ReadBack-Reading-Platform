@@ -30,6 +30,15 @@ const PATHS = {
       <line x1="3" y1="18" x2="3.01" y2="18" />
     </>
   ),
+  // a page with a magnifier over it - research documents
+  research: (
+    <>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h7" />
+      <polyline points="14 2 14 8 20 8" />
+      <circle cx="16.5" cy="16.5" r="3.5" />
+      <line x1="19" y1="19" x2="21.5" y2="21.5" />
+    </>
+  ),
   // page with a folded corner and lines - notes
   notes: (
     <>

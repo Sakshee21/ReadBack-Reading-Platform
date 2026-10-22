@@ -7,9 +7,14 @@
   outline: none;
 }
 
-/* Leave room under the passage so the bar never hides the text just selected. */
-body:has(.hl-bar) .reader-body {
-  padding-bottom: 16rem;
+/* Leave room under the passage so the bar never hides the text just selected.
+   --hl-bar-height is measured from the bar itself, because the bar grows with
+   its contents (a quote, an error, the cite control) and a fixed guess is
+   either wasteful or too short. The fallback only applies for the frame
+   before the measurement lands. */
+body:has(.hl-bar) .reader-body,
+body:has(.hl-bar) .research-body {
+  padding-bottom: calc(var(--hl-bar-height, 16rem) + 3rem);
 }
 
 .hl-mark {
@@ -41,6 +46,25 @@ body:has(.hl-bar) .reader-body {
 }
 .hl-bar:focus {
   outline: none;
+}
+/* Dragging a selection into the bar should carry on through it, not stop
+   dead. Taking the bar out of the pointer path for the duration of the drag
+   lets the selection extend and lets the page auto-scroll; the bar is back to
+   normal the moment the button comes up.
+
+   Driven by an attribute on the body rather than a class on the bar, because
+   the bar is React-rendered and a render mid-drag would disturb the selection
+   the reader is making. */
+body[data-hl-selecting] .hl-bar {
+  pointer-events: none;
+}
+/* Nothing in the bar is part of the passage, so a drag that passes over it
+   must not start selecting its labels. */
+.hl-bar .hl-colors,
+.hl-bar .hl-hint,
+.hl-bar .hl-actions,
+.hl-bar .hl-bar-quote {
+  user-select: none;
 }
 .hl-bar-quote {
   margin: 0 0 8px;

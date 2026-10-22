@@ -3,9 +3,10 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.deps import book_for_user, get_current_user
+from app.deps import annotatable_for_user, get_current_user, is_research
 from app.models import Book, Chapter, Highlight, MicroSession, MicroSessionTheme, User
 from app.schemas import HighlightIn, HighlightOut, HighlightPatch
+from app.services.research_extract import READABLE_KINDS
 from app.services.themes import MIN_SHOWN_SCORE, THEMES, reached_micro_session_ids
 
 router = APIRouter(tags=["highlights"])
@@ -16,20 +17,62 @@ CONTEXT_CHARS = 40
 def _session_numbers(db: Session, book: Book) -> dict[int, int]:
     """micro-session id -> "Session N", numbered as the Sessions drawer does
     (story chapters only, in reading order). One query, not a walk of the
-    whole book."""
+    whole book.
+
+    A research document has no story chapters, so its chunks are numbered
+    across the sections that are actually read instead - otherwise every note
+    on a paper would come back unnumbered.
+    """
+    kinds = list(READABLE_KINDS) if is_research(book) else ["story"]
     rows = (
         db.query(MicroSession.id)
         .join(Chapter, MicroSession.chapter_id == Chapter.id)
-        .filter(Chapter.book_id == book.id, Chapter.section_kind == "story")
+        .filter(Chapter.book_id == book.id, Chapter.section_kind.in_(kinds))
         .order_by(Chapter.index, MicroSession.index)
         .all()
     )
     return {row[0]: n for n, row in enumerate(rows, start=1)}
 
 
+def _research_tags_for(db: Session, book: Book, micro_session_ids: set[int]) -> dict[int, list[dict]]:
+    """The same shape as _themes_for, from the research tag list.
+
+    A research document carries rhetorical tags, not literary themes, so a note
+    taken on a paper is labelled "Method" rather than nothing at all. There is
+    no spoiler rule: a paper has no plot to give away.
+    """
+    from app.models import ResearchTag
+    from app.services.research_tags import (
+        MIN_SHOWN_SCORE as TAG_MIN_SCORE,
+        RESEARCH_TAGS,
+    )
+
+    if not micro_session_ids:
+        return {}
+    rows = (
+        db.query(ResearchTag)
+        .filter(
+            ResearchTag.micro_session_id.in_(micro_session_ids),
+            ResearchTag.score >= TAG_MIN_SCORE,
+            ResearchTag.tag.in_(list(RESEARCH_TAGS)),
+        )
+        .all()
+    )
+    order = list(RESEARCH_TAGS)
+    rows.sort(key=lambda r: (-r.score, order.index(r.tag)))
+    out: dict[int, list[dict]] = {}
+    for r in rows:
+        out.setdefault(r.micro_session_id, []).append(
+            {"theme": r.tag, "label": RESEARCH_TAGS[r.tag]}
+        )
+    return out
+
+
 def _themes_for(db: Session, user: User, book: Book, micro_session_ids: set[int]) -> dict[int, list[dict]]:
     """micro-session id -> its themes worth showing, best first. Only passages the
     reader has reached: a tag on a later one could give the plot away."""
+    if is_research(book):
+        return _research_tags_for(db, book, micro_session_ids)
     micro_session_ids = micro_session_ids & reached_micro_session_ids(db, user, book)
     if not micro_session_ids:
         return {}
@@ -88,7 +131,7 @@ def create_highlight(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    book = book_for_user(db, book_id, user)
+    book = annotatable_for_user(db, book_id, user)
     ms = db.get(MicroSession, payload.micro_session_id)
     chapter = db.get(Chapter, ms.chapter_id) if ms else None
     if ms is None or chapter is None or chapter.book_id != book.id:
@@ -145,7 +188,7 @@ def list_highlights(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    book = book_for_user(db, book_id, user)
+    book = annotatable_for_user(db, book_id, user)
     query = (
         db.query(Highlight, Chapter, MicroSession)
         .join(MicroSession, Highlight.micro_session_id == MicroSession.id)

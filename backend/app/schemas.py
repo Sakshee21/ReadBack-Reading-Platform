@@ -289,3 +289,132 @@ class HighlightOut(BaseModel):
     themes: list[ThemeRef] = []
     created_at: dt.datetime
     updated_at: dt.datetime
+
+
+# ---------------------------------------------------------------------------
+# Research documents
+#
+# A separate track from the reading-habit pilot: papers and textbooks, read by
+# section, private to the uploader. Every metadata field is optional because a
+# document that does not state its year must come back blank rather than
+# guessed - the uploader fills those in by hand.
+# ---------------------------------------------------------------------------
+
+ResearchDocKind = Literal["paper", "textbook"]
+ResearchSectionKind = Literal["abstract", "body", "references", "appendix", "front_matter"]
+
+
+class ResearchMetadataIn(BaseModel):
+    """Metadata the uploader supplies or corrects. Blank means "leave as is"."""
+
+    title: str | None = Field(default=None, max_length=500)
+    authors: str | None = Field(default=None, max_length=255)
+    year: int | None = Field(default=None, ge=1400, le=2200)
+    venue: str | None = Field(default=None, max_length=300)
+    doi: str | None = Field(default=None, max_length=200)
+
+    no_date: bool | None = None
+
+    @field_validator("title", "authors", "venue", "doi")
+    @classmethod
+    def _blank_is_none(cls, value):
+        return (value.strip() or None) if value is not None else None
+
+
+class ResearchSectionOut(BaseModel):
+    id: int
+    index: int
+    title: str
+    kind: ResearchSectionKind
+    word_count: int
+    chunk_count: int
+    # Whether this section is part of the reading flow. References and the
+    # title block are stored and viewable but not read through.
+    readable: bool
+
+
+class ResearchDocumentOut(BaseModel):
+    id: int
+    title: str
+    authors: str
+    doc_kind: ResearchDocKind | None
+    year: int | None
+    venue: str | None
+    doi: str | None
+    page_count: int | None
+    word_count: int
+    section_count: int
+    status: str
+    failure_reason: str | None = None
+    tagging_consent: bool
+    tagging_enabled: bool
+    # Fields a citation needs that are blank or still only a guess. The panel
+    # names them and the citation shows a placeholder, so a wrong citation
+    # cannot be copied into a paper without the gap being visible.
+    needs_review: list[str] = []
+    unverified: list[str] = []
+    # Set by the uploader to say the document genuinely has no date, which is
+    # the only thing that turns a missing year into a citable "n.d.".
+    no_date: bool = False
+    created_at: dt.datetime | None = None
+
+
+class ResearchDocumentDetailOut(ResearchDocumentOut):
+    sections: list[ResearchSectionOut] = []
+    captions: list[str] = []
+    # What the extractor could not do with this document, verbatim.
+    warnings: list[str] = []
+
+
+class ResearchChunkOut(BaseModel):
+    id: int
+    index: int
+    text: str
+    word_count: int
+
+
+class ResearchTagOut(BaseModel):
+    tag: str
+    label: str
+    score: int
+
+
+class ResearchChunkTagsOut(BaseModel):
+    micro_session_id: int
+    tags: list[ResearchTagOut] = []
+
+
+class KeyPointsOut(BaseModel):
+    status: Literal["none", "queued", "running", "done", "failed"]
+    # Always presented as machine-generated in the UI; empty unless done.
+    text: str = ""
+    model: str = ""
+
+
+class ResearchSectionReadOut(BaseModel):
+    """One whole section, the unit the research reader shows."""
+
+    document_id: int
+    section: ResearchSectionOut
+    chunks: list[ResearchChunkOut]
+    previous_section_id: int | None = None
+    next_section_id: int | None = None
+    tags: list[ResearchChunkTagsOut] = []
+    key_points: KeyPointsOut | None = None
+
+
+class ResearchTagStatusOut(BaseModel):
+    """Queue state for a document, for the visible status indicator."""
+
+    enabled: bool
+    queued: int = 0
+    running: int = 0
+    done: int = 0
+    failed: int = 0
+    untagged: int = 0
+    total: int = 0
+    message: str = ""
+
+
+class ConsentIn(BaseModel):
+    consent: bool

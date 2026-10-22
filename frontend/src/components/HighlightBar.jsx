@@ -6,6 +6,11 @@ import { HIGHLIGHT_COLORS, MAX_COMMENT } from "../highlights/constants";
  * highlight. In create mode, picking a colour saves (the comment box is
  * optional); in edit mode a colour change saves at once and the comment has
  * its own Save button.
+ *
+ * While a selection drag is in progress the bar stops taking pointer events,
+ * so the drag passes straight through it. That is done with a body attribute
+ * rather than a prop (see HighlightableText): re-rendering the bar mid-drag
+ * would disturb the selection being made.
  */
 const HighlightBar = forwardRef(function HighlightBar(
   { mode, quote, initialColor, initialComment = "", error, busy, onPickColor, onSaveComment, onDelete, onClose, extra = null },

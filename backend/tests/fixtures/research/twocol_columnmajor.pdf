@@ -1,0 +1,382 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R] /Count 4 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 8746 >>
+stream
+BT /F1 15 Tf 1 0 0 1 54 788 Tm (Attention Scaffolding for Sustained Long-Form Reading) Tj ET
+BT /F1 10 Tf 1 0 0 1 54 766 Tm (A. Reader, B. Writer, and C. Editor) Tj ET
+BT /F1 8 Tf 1 0 0 1 54 752 Tm (IEEE Transactions on Learning Technologies, vol. 14, no. 3, 2021) Tj ET
+BT /F1 8 Tf 1 0 0 1 54 740 Tm (Digital Object Identifier 10.1109/TLT.2021.1234567) Tj ET
+BT /F1 9 Tf 1 0 0 1 54 718 Tm (Abstract-Long-form reading has declined among undergraduates while short-form media consumption has risen. We present a) Tj ET
+BT /F1 9 Tf 1 0 0 1 54 706.5 Tm (reading platform that borrows retention mechanics from streaming interfaces and applies them to book reading.) Tj ET
+BT /F1 9 Tf 1 0 0 1 54 695 Tm (In a three-week study with twenty participants we measure session length, comprehension retention and) Tj ET
+BT /F1 9 Tf 1 0 0 1 54 683.5 Tm (self-reported engagement. Sessions lengthened by a mean of four minutes and comprehension scores did not) Tj ET
+BT /F1 9 Tf 1 0 0 1 54 672 Tm (decline, suggesting that habit scaffolding need not come at the cost of depth.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 629 Tm (I. INTRODUCTION) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 617.5 Tm (The activation energy required to begin a reading) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 606 Tm (session is disproportionately high when compared) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 594.5 Tm (with low-effort alternatives. Prior work attributes) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 583 Tm (this to the absence of automated progression rather) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 571.5 Tm (than to any deficit in reading ability. We take the) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 560 Tm (position that modern behavioural mechanics should be) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 548.5 Tm (repurposed rather than resisted.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 525.5 Tm (The activation energy required to begin a reading) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 514 Tm (session is disproportionately high when compared) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 502.5 Tm (with low-effort alternatives. Prior work attributes) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 491 Tm (this to the absence of automated progression rather) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 479.5 Tm (than to any deficit in reading ability. We take the) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 468 Tm (position that modern behavioural mechanics should be) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 456.5 Tm (repurposed rather than resisted.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 433.5 Tm (The activation energy required to begin a reading) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 422 Tm (session is disproportionately high when compared) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 410.5 Tm (with low-effort alternatives. Prior work attributes) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 399 Tm (this to the absence of automated progression rather) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 387.5 Tm (than to any deficit in reading ability. We take the) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 376 Tm (position that modern behavioural mechanics should be) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 364.5 Tm (repurposed rather than resisted.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 341.5 Tm (The activation energy required to begin a reading) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 330 Tm (session is disproportionately high when compared) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 318.5 Tm (with low-effort alternatives. Prior work attributes) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 307 Tm (this to the absence of automated progression rather) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 295.5 Tm (than to any deficit in reading ability. We take the) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 284 Tm (position that modern behavioural mechanics should be) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 272.5 Tm (repurposed rather than resisted.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 249.5 Tm (The activation energy required to begin a reading) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 238 Tm (session is disproportionately high when compared) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 226.5 Tm (with low-effort alternatives. Prior work attributes) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 215 Tm (this to the absence of automated progression rather) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 203.5 Tm (than to any deficit in reading ability. We take the) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 192 Tm (position that modern behavioural mechanics should be) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 180.5 Tm (repurposed rather than resisted.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 157.5 Tm (The activation energy required to begin a reading) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 146 Tm (session is disproportionately high when compared) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 134.5 Tm (with low-effort alternatives. Prior work attributes) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 123 Tm (this to the absence of automated progression rather) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 111.5 Tm (than to any deficit in reading ability. We take the) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 100 Tm (position that modern behavioural mechanics should be) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 88.5 Tm (repurposed rather than resisted.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 640.5 Tm (Our contribution is threefold. First, we describe a) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 629 Tm (segmentation method that cuts a book at narrative) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 617.5 Tm (boundaries. Second, we report a pilot deployment.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 606 Tm (Third, we release the instrumentation schema so that) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 594.5 Tm (other groups can replicate the measurement.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 571.5 Tm (Our contribution is threefold. First, we describe a) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 560 Tm (segmentation method that cuts a book at narrative) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 548.5 Tm (boundaries. Second, we report a pilot deployment.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 537 Tm (Third, we release the instrumentation schema so that) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 525.5 Tm (other groups can replicate the measurement.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 502.5 Tm (Our contribution is threefold. First, we describe a) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 491 Tm (segmentation method that cuts a book at narrative) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 479.5 Tm (boundaries. Second, we report a pilot deployment.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 468 Tm (Third, we release the instrumentation schema so that) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 456.5 Tm (other groups can replicate the measurement.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 433.5 Tm (Our contribution is threefold. First, we describe a) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 422 Tm (segmentation method that cuts a book at narrative) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 410.5 Tm (boundaries. Second, we report a pilot deployment.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 399 Tm (Third, we release the instrumentation schema so that) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 387.5 Tm (other groups can replicate the measurement.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 364.5 Tm (Our contribution is threefold. First, we describe a) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 353 Tm (segmentation method that cuts a book at narrative) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 341.5 Tm (boundaries. Second, we report a pilot deployment.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 330 Tm (Third, we release the instrumentation schema so that) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 318.5 Tm (other groups can replicate the measurement.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 295.5 Tm (Our contribution is threefold. First, we describe a) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 284 Tm (segmentation method that cuts a book at narrative) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 272.5 Tm (boundaries. Second, we report a pilot deployment.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 261 Tm (Third, we release the instrumentation schema so that) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 249.5 Tm (other groups can replicate the measurement.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 226.5 Tm (II. RELATED WORK) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 215 Tm (Dual coding theory holds that symbolic and imagistic) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 203.5 Tm (representations are encoded along separate pathways.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 192 Tm (The original formulation by Paivio has been extended) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 180.5 Tm (to reading comprehension by a number of authors.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 169 Tm (Separately, the literature on variable reward) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 157.5 Tm (scheduling describes why intermittent reinforcement) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 146 Tm (sustains engagement more effectively than fixed) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 134.5 Tm (schedules.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 111.5 Tm (Dual coding theory holds that symbolic and imagistic) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 100 Tm (representations are encoded along separate pathways.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 88.5 Tm (The original formulation by Paivio has been extended) Tj ET
+BT /F1 8 Tf 1 0 0 1 291.5 50 Tm (1) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 9043 >>
+stream
+BT /F1 7 Tf 1 0 0 1 54 788 Tm (IEEE TRANSACTIONS ON LEARNING TECHNOLOGIES, VOL. 14, NO. 3, MARCH 2021) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 758 Tm (to reading comprehension by a number of authors.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 746.5 Tm (Separately, the literature on variable reward) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 735 Tm (scheduling describes why intermittent reinforcement) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 723.5 Tm (sustains engagement more effectively than fixed) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 712 Tm (schedules.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 689 Tm (Dual coding theory holds that symbolic and imagistic) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 677.5 Tm (representations are encoded along separate pathways.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 666 Tm (The original formulation by Paivio has been extended) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 654.5 Tm (to reading comprehension by a number of authors.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 643 Tm (Separately, the literature on variable reward) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 631.5 Tm (scheduling describes why intermittent reinforcement) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 620 Tm (sustains engagement more effectively than fixed) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 608.5 Tm (schedules.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 585.5 Tm (Dual coding theory holds that symbolic and imagistic) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 574 Tm (representations are encoded along separate pathways.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 562.5 Tm (The original formulation by Paivio has been extended) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 551 Tm (to reading comprehension by a number of authors.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 539.5 Tm (Separately, the literature on variable reward) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 528 Tm (scheduling describes why intermittent reinforcement) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 516.5 Tm (sustains engagement more effectively than fixed) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 505 Tm (schedules.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 482 Tm (Dual coding theory holds that symbolic and imagistic) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 470.5 Tm (representations are encoded along separate pathways.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 459 Tm (The original formulation by Paivio has been extended) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 447.5 Tm (to reading comprehension by a number of authors.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 436 Tm (Separately, the literature on variable reward) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 424.5 Tm (scheduling describes why intermittent reinforcement) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 413 Tm (sustains engagement more effectively than fixed) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 401.5 Tm (schedules.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 378.5 Tm (Dual coding theory holds that symbolic and imagistic) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 367 Tm (representations are encoded along separate pathways.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 355.5 Tm (The original formulation by Paivio has been extended) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 344 Tm (to reading comprehension by a number of authors.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 332.5 Tm (Separately, the literature on variable reward) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 321 Tm (scheduling describes why intermittent reinforcement) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 309.5 Tm (sustains engagement more effectively than fixed) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 298 Tm (schedules.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 275 Tm (III. METHOD) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 263.5 Tm (Participants were recruited from an undergraduate) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 252 Tm (population. Each was assigned one of five) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 240.5 Tm (public-domain novels. The platform logged every) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 229 Tm (user-facing interaction with a timestamp, and active) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 217.5 Tm (reading time excluded intervals during which the) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 206 Tm (browser tab was hidden.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 183 Tm (Participants were recruited from an undergraduate) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 171.5 Tm (population. Each was assigned one of five) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 160 Tm (public-domain novels. The platform logged every) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 148.5 Tm (user-facing interaction with a timestamp, and active) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 137 Tm (reading time excluded intervals during which the) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 125.5 Tm (browser tab was hidden.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 102.5 Tm (Participants were recruited from an undergraduate) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 91 Tm (population. Each was assigned one of five) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 758 Tm (public-domain novels. The platform logged every) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 746.5 Tm (user-facing interaction with a timestamp, and active) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 735 Tm (reading time excluded intervals during which the) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 723.5 Tm (browser tab was hidden.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 700.5 Tm (Participants were recruited from an undergraduate) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 689 Tm (population. Each was assigned one of five) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 677.5 Tm (public-domain novels. The platform logged every) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 666 Tm (user-facing interaction with a timestamp, and active) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 654.5 Tm (reading time excluded intervals during which the) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 643 Tm (browser tab was hidden.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 620 Tm (Participants were recruited from an undergraduate) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 608.5 Tm (population. Each was assigned one of five) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 597 Tm (public-domain novels. The platform logged every) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 585.5 Tm (user-facing interaction with a timestamp, and active) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 574 Tm (reading time excluded intervals during which the) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 562.5 Tm (browser tab was hidden.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 539.5 Tm (Participants were recruited from an undergraduate) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 528 Tm (population. Each was assigned one of five) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 516.5 Tm (public-domain novels. The platform logged every) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 505 Tm (user-facing interaction with a timestamp, and active) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 493.5 Tm (reading time excluded intervals during which the) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 482 Tm (browser tab was hidden.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 470.5 Tm (Segment length was held between four hundred and six) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 459 Tm (hundred words. The boundary detector preferred) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 447.5 Tm (positions at which a paragraph ended with an) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 436 Tm (unresolved question, on the assumption that such) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 424.5 Tm (positions function as cliffhangers.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 401.5 Tm (Segment length was held between four hundred and six) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 390 Tm (hundred words. The boundary detector preferred) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 378.5 Tm (positions at which a paragraph ended with an) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 367 Tm (unresolved question, on the assumption that such) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 355.5 Tm (positions function as cliffhangers.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 332.5 Tm (Segment length was held between four hundred and six) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 321 Tm (hundred words. The boundary detector preferred) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 309.5 Tm (positions at which a paragraph ended with an) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 298 Tm (unresolved question, on the assumption that such) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 286.5 Tm (positions function as cliffhangers.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 263.5 Tm (Segment length was held between four hundred and six) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 252 Tm (hundred words. The boundary detector preferred) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 240.5 Tm (positions at which a paragraph ended with an) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 229 Tm (unresolved question, on the assumption that such) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 217.5 Tm (positions function as cliffhangers.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 194.5 Tm (Segment length was held between four hundred and six) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 183 Tm (hundred words. The boundary detector preferred) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 171.5 Tm (positions at which a paragraph ended with an) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 160 Tm (unresolved question, on the assumption that such) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 148.5 Tm (positions function as cliffhangers.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 125.5 Tm (Segment length was held between four hundred and six) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 114 Tm (hundred words. The boundary detector preferred) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 102.5 Tm (positions at which a paragraph ended with an) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 91 Tm (unresolved question, on the assumption that such) Tj ET
+BT /F1 8 Tf 1 0 0 1 291.5 50 Tm (2) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 8831 >>
+stream
+BT /F1 7 Tf 1 0 0 1 54 788 Tm (IEEE TRANSACTIONS ON LEARNING TECHNOLOGIES, VOL. 14, NO. 3, MARCH 2021) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 758 Tm (positions function as cliffhangers.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 735 Tm (IV. RESULTS) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 723.5 Tm (Mean session length rose from eleven to fifteen) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 712 Tm (minutes over the study period. Comprehension) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 700.5 Tm (checkpoint scores were flat, with a mean of 0.72 in) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 689 Tm (week one and 0.74 in week three. Eighteen of twenty) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 677.5 Tm (participants reported that the recap feature reduced) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 666 Tm (the friction of resuming a book.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 643 Tm (Mean session length rose from eleven to fifteen) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 631.5 Tm (minutes over the study period. Comprehension) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 620 Tm (checkpoint scores were flat, with a mean of 0.72 in) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 608.5 Tm (week one and 0.74 in week three. Eighteen of twenty) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 597 Tm (participants reported that the recap feature reduced) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 585.5 Tm (the friction of resuming a book.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 562.5 Tm (Mean session length rose from eleven to fifteen) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 551 Tm (minutes over the study period. Comprehension) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 539.5 Tm (checkpoint scores were flat, with a mean of 0.72 in) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 528 Tm (week one and 0.74 in week three. Eighteen of twenty) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 516.5 Tm (participants reported that the recap feature reduced) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 505 Tm (the friction of resuming a book.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 482 Tm (Mean session length rose from eleven to fifteen) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 470.5 Tm (minutes over the study period. Comprehension) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 459 Tm (checkpoint scores were flat, with a mean of 0.72 in) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 447.5 Tm (week one and 0.74 in week three. Eighteen of twenty) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 436 Tm (participants reported that the recap feature reduced) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 424.5 Tm (the friction of resuming a book.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 401.5 Tm (Mean session length rose from eleven to fifteen) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 390 Tm (minutes over the study period. Comprehension) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 378.5 Tm (checkpoint scores were flat, with a mean of 0.72 in) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 367 Tm (week one and 0.74 in week three. Eighteen of twenty) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 355.5 Tm (participants reported that the recap feature reduced) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 344 Tm (the friction of resuming a book.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 321 Tm (Mean session length rose from eleven to fifteen) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 309.5 Tm (minutes over the study period. Comprehension) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 298 Tm (checkpoint scores were flat, with a mean of 0.72 in) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 286.5 Tm (week one and 0.74 in week three. Eighteen of twenty) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 275 Tm (participants reported that the recap feature reduced) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 263.5 Tm (the friction of resuming a book.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 240.5 Tm (V. DISCUSSION) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 229 Tm (The absence of a comprehension penalty is the result) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 217.5 Tm (we consider most load-bearing. A platform that) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 206 Tm (lengthens sessions by degrading attention quality) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 194.5 Tm (would not be worth deploying. We note that our) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 183 Tm (sample is small and drawn from a single institution.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 160 Tm (The absence of a comprehension penalty is the result) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 148.5 Tm (we consider most load-bearing. A platform that) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 137 Tm (lengthens sessions by degrading attention quality) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 125.5 Tm (would not be worth deploying. We note that our) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 114 Tm (sample is small and drawn from a single institution.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 91 Tm (The absence of a comprehension penalty is the result) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 758 Tm (we consider most load-bearing. A platform that) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 746.5 Tm (lengthens sessions by degrading attention quality) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 735 Tm (would not be worth deploying. We note that our) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 723.5 Tm (sample is small and drawn from a single institution.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 700.5 Tm (The absence of a comprehension penalty is the result) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 689 Tm (we consider most load-bearing. A platform that) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 677.5 Tm (lengthens sessions by degrading attention quality) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 666 Tm (would not be worth deploying. We note that our) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 654.5 Tm (sample is small and drawn from a single institution.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 631.5 Tm (The absence of a comprehension penalty is the result) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 620 Tm (we consider most load-bearing. A platform that) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 608.5 Tm (lengthens sessions by degrading attention quality) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 597 Tm (would not be worth deploying. We note that our) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 585.5 Tm (sample is small and drawn from a single institution.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 562.5 Tm (The absence of a comprehension penalty is the result) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 551 Tm (we consider most load-bearing. A platform that) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 539.5 Tm (lengthens sessions by degrading attention quality) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 528 Tm (would not be worth deploying. We note that our) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 516.5 Tm (sample is small and drawn from a single institution.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 493.5 Tm (VI. CONCLUSION) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 482 Tm (Habit scaffolding borrowed from streaming interfaces) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 470.5 Tm (lengthened reading sessions without measurable) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 459 Tm (comprehension cost. Future work should test whether) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 447.5 Tm (revealing artwork suppresses self-generated imagery.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 424.5 Tm (Habit scaffolding borrowed from streaming interfaces) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 413 Tm (lengthened reading sessions without measurable) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 401.5 Tm (comprehension cost. Future work should test whether) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 390 Tm (revealing artwork suppresses self-generated imagery.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 367 Tm (Habit scaffolding borrowed from streaming interfaces) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 355.5 Tm (lengthened reading sessions without measurable) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 344 Tm (comprehension cost. Future work should test whether) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 332.5 Tm (revealing artwork suppresses self-generated imagery.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 309.5 Tm (Habit scaffolding borrowed from streaming interfaces) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 298 Tm (lengthened reading sessions without measurable) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 286.5 Tm (comprehension cost. Future work should test whether) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 275 Tm (revealing artwork suppresses self-generated imagery.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 252 Tm (Habit scaffolding borrowed from streaming interfaces) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 240.5 Tm (lengthened reading sessions without measurable) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 229 Tm (comprehension cost. Future work should test whether) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 217.5 Tm (revealing artwork suppresses self-generated imagery.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 194.5 Tm (Habit scaffolding borrowed from streaming interfaces) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 183 Tm (lengthened reading sessions without measurable) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 171.5 Tm (comprehension cost. Future work should test whether) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 160 Tm (revealing artwork suppresses self-generated imagery.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 137 Tm (Fig. 1. Mean active session length by study week.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 125.5 Tm (Error bars show one standard deviation.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 311 102.5 Tm (L\(t\) = a log\(1 + bt\) + e,    e ~ N\(0, s^2\)        \(1\)) Tj ET
+BT /F1 8 Tf 1 0 0 1 291.5 50 Tm (3) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 11 0 R >>
+endobj
+11 0 obj
+<< /Length 1420 >>
+stream
+BT /F1 7 Tf 1 0 0 1 54 788 Tm (IEEE TRANSACTIONS ON LEARNING TECHNOLOGIES, VOL. 14, NO. 3, MARCH 2021) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 758 Tm (Week   N    Mean    SD) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 746.5 Tm (1      20   11.2    3.4) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 735 Tm (2      20   13.8    3.9) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 723.5 Tm (3      19   15.1    4.2) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 700.5 Tm (REFERENCES) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 689 Tm ([1] A. Paivio, Mental Representations: A Dual Coding) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 677.5 Tm (Approach. Oxford, U.K.: Oxford Univ. Press, 1986.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 666 Tm ([2] B. J. Fogg, "A behavior model for persuasive) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 654.5 Tm (design," in Proc. 4th Int. Conf. Persuasive) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 643 Tm (Technol., 2009, pp. 1-7.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 631.5 Tm ([3] M. Mangen and A. van der Weel, "The evolution of) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 620 Tm (reading in the age of digitisation," J. Res.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 608.5 Tm (Reading, vol. 39, no. 1, pp. 116-124, 2016.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 597 Tm ([4] K. Thompson and R. Patel, "Micro-sessions and) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 585.5 Tm (retention in digital reading," IEEE Trans. Learn.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 574 Tm (Technol., vol. 12, no. 2, pp. 201-213, 2019.) Tj ET
+BT /F1 8 Tf 1 0 0 1 291.5 50 Tm (4) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Title (Attention Scaffolding for Sustained Long-Form Reading) /Author (A. Reader, B. Writer, and C. Editor) >>
+endobj
+xref
+0 13
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000134 00000 n 
+0000000204 00000 n 
+0000000330 00000 n 
+0000009128 00000 n 
+0000009254 00000 n 
+0000018349 00000 n 
+0000018475 00000 n 
+0000027358 00000 n 
+0000027486 00000 n 
+0000028959 00000 n 
+trailer
+<< /Size 13 /Root 1 0 R /Info 12 0 R >>
+startxref
+29090
+%%EOF

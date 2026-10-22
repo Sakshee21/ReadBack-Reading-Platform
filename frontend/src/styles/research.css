@@ -1,0 +1,533 @@
+/*
+ * The research track.
+ *
+ * A plain reading layout on purpose: no mood tint, no decorative motion, no
+ * progress ring. It uses the same colour tokens as everything else, so the
+ * appearance themes (including the custom palette) apply here unchanged, and
+ * no colour is hard-coded.
+ */
+
+.research-page,
+.research-reader {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.research-subtitle {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  max-width: 54ch;
+}
+
+.research-header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------- library */
+
+.research-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.research-card-wrap {
+  position: relative;
+}
+
+.research-card {
+  display: block;
+  height: 100%;
+  padding: 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.research-card:hover {
+  border-color: var(--accent);
+}
+
+.research-card.is-unready {
+  opacity: 0.75;
+}
+
+.research-card h3 {
+  margin: 0.5rem 0 0.2rem;
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.research-card .author {
+  margin: 0 0 0.4rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.research-card-top {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.research-kind-badge,
+.research-tag-badge {
+  display: inline-block;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.research-card-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.research-delete {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.research-card-wrap:hover .research-delete,
+.research-delete:focus-visible {
+  opacity: 1;
+}
+
+.research-empty {
+  margin: 3rem auto;
+  max-width: 48ch;
+  text-align: center;
+  color: var(--muted);
+}
+
+.research-empty h2 {
+  color: var(--text);
+}
+
+.research-export {
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ----------------------------------------------------------------- reader */
+
+.research-topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.research-topbar-title {
+  flex: 1;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.research-topbar-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.research-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 280px;
+  gap: 1.75rem;
+  margin-top: 1.5rem;
+  align-items: start;
+}
+
+.research-sections h2,
+.research-panel h2 {
+  margin: 0 0 0.6rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.research-sections ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.research-section-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.45rem 0.6rem;
+  border: 0;
+  border-left: 2px solid transparent;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 0 6px 6px 0;
+}
+
+.research-section-link:hover {
+  background: var(--surface);
+}
+
+.research-section-link.is-current {
+  border-left-color: var(--accent);
+  background: var(--surface);
+}
+
+.research-section-link.is-aside .research-section-name {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.research-section-name {
+  display: block;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.research-section-meta {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.research-aside-note {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.research-body {
+  min-width: 0;
+}
+
+.research-section-header {
+  margin-bottom: 1.5rem;
+}
+
+.research-section-kind {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.research-section-header h1 {
+  margin: 0.2rem 0 0.3rem;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+.research-section-stats {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* A measure that stays readable: narrower than the column it sits in. */
+.research-chunk,
+.research-plain-text {
+  max-width: 68ch;
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+.research-chunk + .research-chunk {
+  margin-top: 0.4rem;
+}
+
+.research-plain-text p {
+  margin: 0 0 0.9rem;
+}
+
+.research-chunk-tags {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0.2rem 0 1rem;
+  padding: 0;
+}
+
+.research-chunk-tag {
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.research-section-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ------------------------------------------------------- key points panel */
+
+.research-key-points {
+  margin-bottom: 1.75rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.research-key-points h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.research-generated-badge {
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.research-key-points ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.research-key-points p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- sidebar */
+
+.research-panel {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.research-panel:last-child {
+  border-bottom: 0;
+}
+
+.research-meta-list {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+}
+
+.research-meta-list dt {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.research-meta-list dd {
+  margin: 0 0 0.55rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.research-meta-list em {
+  color: var(--muted);
+}
+
+.research-panel-note {
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.research-tag-status {
+  margin: 0.5rem 0;
+  font-size: 0.82rem;
+}
+
+.research-warnings,
+.research-captions {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.research-warnings li,
+.research-captions li {
+  margin-bottom: 0.4rem;
+}
+
+.research-notice {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 0.85rem;
+}
+
+/* ------------------------------------------------------------------ forms */
+
+.research-metadata-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.research-field {
+  display: block;
+}
+
+.research-field-label {
+  display: block;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+
+.research-field-missing {
+  text-transform: none;
+  letter-spacing: 0;
+  font-style: italic;
+}
+
+.research-field input {
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.research-field-hint {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.research-kind {
+  margin: 0.75rem 0;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.research-kind legend {
+  padding: 0 0.3rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.research-kind label {
+  display: block;
+  font-size: 0.9rem;
+  margin: 0.2rem 0;
+}
+
+.research-consent {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0.75rem 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.research-metadata-details summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.research-upload {
+  max-width: 540px;
+}
+
+/* ------------------------------------------------------------- narrow view */
+
+@media (max-width: 1100px) {
+  .research-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .research-sections ol {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding-bottom: 0.4rem;
+  }
+
+  .research-section-link {
+    white-space: nowrap;
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 6px;
+  }
+
+  .research-section-link.is-current {
+    border-left-color: transparent;
+    border-bottom-color: var(--accent);
+  }
+}
+
+/* Named gaps in the citation metadata. Deliberately plain rather than alarming:
+   this is a prompt to fill something in, not an error. */
+.research-review-warning {
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--text);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+.research-review-warning code {
+  font-size: 0.95em;
+}
+.research-field-review {
+  text-transform: none;
+  letter-spacing: 0;
+  font-style: italic;
+}

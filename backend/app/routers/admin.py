@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
+from app.deps import RESEARCH
 from app.models import Book, Chapter, MicroSession, MicroSessionTheme, ReadingEvent, User
 from app.services.themes import MIN_SHOWN_SCORE
 
@@ -42,11 +43,18 @@ def export_events_csv(token: str = Query(...), db: Session = Depends(get_db)):
         bid: (uploaded, source)
         for bid, uploaded, source in db.query(Book.id, Book.is_user_uploaded, Book.source_type).all()
     }
+    # Research documents are a separate track, not study data. The research
+    # reader emits no events and /events drops any that arrive, so this should
+    # match nothing - it is here so that a stray row from an earlier build
+    # cannot quietly inflate session counts.
+    research_ids = {bid for bid, (_, source) in book_meta.items() if source == RESEARCH}
 
     buffer = io.StringIO()
     writer = csv.writer(buffer)
     writer.writerow(EVENT_COLUMNS)
     for ev in db.query(ReadingEvent).order_by(ReadingEvent.id).all():
+        if ev.book_id in research_ids:
+            continue
         writer.writerow(
             [
                 ev.id,
@@ -88,7 +96,9 @@ THEME_COLUMNS = [
 def export_themes_csv(token: str = Query(...), db: Session = Depends(get_db)):
     """Token-protected CSV of theme tags for the shared (seeded) books, one row
     per chunk and theme, scores of 3 or more only. Joins to the events export on
-    micro_session_id. Uploaded books are private and never included."""
+    micro_session_id. Uploaded books are private and never included, and nor are
+    research documents - those carry research tags, from a different list and a
+    different table, exported per-user from /research/export/sections.csv."""
     if token != settings.admin_token:
         raise HTTPException(status_code=403, detail="Invalid admin token")
 

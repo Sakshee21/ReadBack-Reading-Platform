@@ -12,7 +12,9 @@ export const STYLES = ["apa", "mla", "chicago"];
 const SOURCE = "Project Gutenberg";
 const ROMAN = { i: 1, v: 5, x: 10, l: 50, c: 100, d: 500, m: 1000 };
 
-const part = (text, italic = false) => (italic ? { text, italic: true } : { text });
+// Exported so the research citations can build the same {text, italic} parts
+// and render through the same toPlain/toMarkdown/toHtml.
+export const part = (text, italic = false) => (italic ? { text, italic: true } : { text });
 const fromRoman = (s) => {
   let total = 0;
   const digits = [...s.toLowerCase()].map((c) => ROMAN[c]);
@@ -48,7 +50,7 @@ export function parseAuthor(name) {
   return { unknown: false, last, given, single: false };
 }
 
-const initials = (given) =>
+export const initials = (given) =>
   given
     .split(/\s+/)
     .filter(Boolean)

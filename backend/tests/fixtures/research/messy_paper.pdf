@@ -1,0 +1,101 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 2853 >>
+stream
+BT /F1 15 Tf 1 0 0 1 54 788 Tm (Detecting Intrusions with Honeypots) Tj ET
+BT /F1 9 Tf 1 0 0 1 54 764 Tm (Department of Computer Science, University of Somewhere) Tj ET
+BT /F1 9 Tf 1 0 0 1 54 736 Tm (Abstract-We present a dataset of intrusion attempts gathered from a public honeypot and describe the) Tj ET
+BT /F1 9 Tf 1 0 0 1 54 724.5 Tm (labelling procedure used to prepare it.) Tj ET
+BT /F1 11 Tf 1 0 0 1 54 691 Tm (T) Tj ET
+BT /F1 11 Tf 1 0 0 1 65 691 Tm (HE Internet of Things) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 668 Tm (Honeypot and labeled according to Enterprise Tactics of MITRE ATT&CK to ensure dataset) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 656.5 Tm (credibility.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 645 Tm (Traffic was captured over six months and replayed in a closed network for analysis. The) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 633.5 Tm (resulting corpus is available on request.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 610.5 Tm (Honeypot and labeled according to Enterprise Tactics of MITRE ATT&CK to ensure dataset) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 599 Tm (credibility.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 587.5 Tm (Traffic was captured over six months and replayed in a closed network for analysis. The) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 576 Tm (resulting corpus is available on request.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 553 Tm (Honeypot and labeled according to Enterprise Tactics of MITRE ATT&CK to ensure dataset) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 541.5 Tm (credibility.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 530 Tm (Traffic was captured over six months and replayed in a closed network for analysis. The) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 518.5 Tm (resulting corpus is available on request.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 495.5 Tm (Honeypot and labeled according to Enterprise Tactics of MITRE ATT&CK to ensure dataset) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 484 Tm (credibility.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 472.5 Tm (Traffic was captured over six months and replayed in a closed network for analysis. The) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 461 Tm (resulting corpus is available on request.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 438 Tm (Honeypot and labeled according to Enterprise Tactics of MITRE ATT&CK to ensure dataset) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 426.5 Tm (credibility.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 415 Tm (Traffic was captured over six months and replayed in a closed network for analysis. The) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 403.5 Tm (resulting corpus is available on request.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 380.5 Tm (Honeypot and labeled according to Enterprise Tactics of MITRE ATT&CK to ensure dataset) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 369 Tm (credibility.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 357.5 Tm (Traffic was captured over six months and replayed in a closed network for analysis. The) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 346 Tm (resulting corpus is available on request.) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 685 >>
+stream
+BT /F1 7 Tf 1 0 0 1 54 788 Tm (DETECTING INTRUSIONS WITH HONEYPOTS) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 748 Tm (The evaluation compares three detectors on the corpus.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 725 Tm (The evaluation compares three detectors on the corpus.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 702 Tm (The evaluation compares three detectors on the corpus.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 679 Tm (The evaluation compares three detectors on the corpus.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 656 Tm (The evaluation compares three detectors on the corpus.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 633 Tm (The evaluation compares three detectors on the corpus.) Tj ET
+BT /F1 8 Tf 1 0 0 1 291.5 50 Tm (2) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 685 >>
+stream
+BT /F1 7 Tf 1 0 0 1 54 788 Tm (DETECTING INTRUSIONS WITH HONEYPOTS) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 748 Tm (The evaluation compares three detectors on the corpus.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 725 Tm (The evaluation compares three detectors on the corpus.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 702 Tm (The evaluation compares three detectors on the corpus.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 679 Tm (The evaluation compares three detectors on the corpus.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 656 Tm (The evaluation compares three detectors on the corpus.) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 54 633 Tm (The evaluation compares three detectors on the corpus.) Tj ET
+BT /F1 8 Tf 1 0 0 1 291.5 50 Tm (3) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Title (Detecting Intrusions with Honeypots) /Author (Microsoft Word) >>
+endobj
+xref
+0 11
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000127 00000 n 
+0000000197 00000 n 
+0000000323 00000 n 
+0000003228 00000 n 
+0000003354 00000 n 
+0000004090 00000 n 
+0000004216 00000 n 
+0000004952 00000 n 
+trailer
+<< /Size 11 /Root 1 0 R /Info 10 0 R >>
+startxref
+5044
+%%EOF

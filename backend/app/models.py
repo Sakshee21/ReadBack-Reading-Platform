@@ -71,6 +71,18 @@ class Book(Base):
     theme_tagging_consent: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     theme_tagging_consent_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
 
+    # --- research documents only (source_type == "research") ---------------
+    # paper | textbook. Null for everything in the reading-habit track.
+    doc_kind: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    # Citation fields the research extractor reads out of the document, or that
+    # the owner corrects by hand. Null means "not found", never a guess.
+    venue: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    doi: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    page_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # {"captions": [...], "warnings": [...]} from the extractor, kept so the
+    # document page can be honest about what it could not handle.
+    research_notes: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
     chapters: Mapped[list["Chapter"]] = relationship(
         back_populates="book", order_by="Chapter.index", cascade="all, delete-orphan"
     )
@@ -250,6 +262,79 @@ class MicroSessionTheme(Base):
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow)
 
     __table_args__ = (UniqueConstraint("micro_session_id", "theme", "source", name="uq_msthemes_chunk_theme_source"),)
+
+
+class ResearchTag(Base):
+    """One rhetorical tag on one chunk of a research document.
+
+    Kept in its own table rather than alongside the literary themes: the two
+    lists mean different things (a novel passage is *about* grief; a paper
+    paragraph *is* a claim), they version independently, and a research
+    document must never appear in the pilot theme export. Same rules
+    otherwise - scores below 3 are stored for analysis but never shown, and a
+    stored tag is never overwritten.
+    """
+
+    __tablename__ = "research_tags"
+    __table_args__ = (
+        UniqueConstraint("micro_session_id", "tag", "source", name="uq_research_tags_chunk_tag_source"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    micro_session_id: Mapped[int] = mapped_column(
+        ForeignKey("micro_sessions.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    tag: Mapped[str] = mapped_column(String(32), nullable=False)
+    score: Mapped[int] = mapped_column(Integer, nullable=False)
+    source: Mapped[str] = mapped_column(String(8), default="llm", server_default="llm")
+    model: Mapped[str] = mapped_column(String(120), default="")
+    prompt_version: Mapped[int] = mapped_column(Integer, default=1)
+    tag_list_version: Mapped[int] = mapped_column(Integer, default=1)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow)
+
+
+class ResearchTagging(Base):
+    """Queue state for one chunk of a research document: queued, running, done
+    or failed. The status the reader sees comes from counting these."""
+
+    __tablename__ = "research_tagging"
+
+    micro_session_id: Mapped[int] = mapped_column(
+        ForeignKey("micro_sessions.id", ondelete="CASCADE"), primary_key=True
+    )
+    status: Mapped[str] = mapped_column(String(12), nullable=False)
+    model: Mapped[str] = mapped_column(String(120), default="")
+    prompt_version: Mapped[int] = mapped_column(Integer, default=1)
+    tag_list_version: Mapped[int] = mapped_column(Integer, default=1)
+    claimed_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+    updated_at: Mapped[dt.datetime] = mapped_column(
+        DateTime, default=dt.datetime.utcnow, onupdate=dt.datetime.utcnow
+    )
+    error: Mapped[str | None] = mapped_column(String(200), nullable=True)
+
+
+class SectionKeyPoints(Base):
+    """Machine-generated key points for one section of a research document.
+
+    Always labelled as generated in the UI. ``text`` is empty until the model
+    has answered, and stays empty when it fails - a failed call shows nothing
+    rather than a guess.
+    """
+
+    __tablename__ = "section_key_points"
+
+    chapter_id: Mapped[int] = mapped_column(
+        ForeignKey("chapters.id", ondelete="CASCADE"), primary_key=True
+    )
+    status: Mapped[str] = mapped_column(String(12), nullable=False)
+    text: Mapped[str] = mapped_column(Text, default="", server_default="")
+    model: Mapped[str] = mapped_column(String(120), default="")
+    prompt_version: Mapped[int] = mapped_column(Integer, default=1)
+    claimed_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+    updated_at: Mapped[dt.datetime] = mapped_column(
+        DateTime, default=dt.datetime.utcnow, onupdate=dt.datetime.utcnow
+    )
+    error: Mapped[str | None] = mapped_column(String(200), nullable=True)
 
 
 class MicroSessionTagging(Base):

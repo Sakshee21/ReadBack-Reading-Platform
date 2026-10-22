@@ -7,6 +7,7 @@ import "./styles/breaks.css";
 import "./styles/appearance.css";
 import "./styles/highlights.css";
 import "./styles/themes-page.css";
+import "./styles/research.css";
 import App from "./App.jsx";
 import { applyStoredTheme } from "./theme/appearance";
 

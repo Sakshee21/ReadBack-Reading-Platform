@@ -80,6 +80,10 @@ export default function Library() {
             <Icon name="upload" />
             Add your own book
           </button>
+          <Link to="/research" className="btn-secondary">
+            <Icon name="research" />
+            Research
+          </Link>
           <button className="btn-secondary" onClick={() => setSettingsOpen(true)}>
             <Icon name="settings" />
             Settings

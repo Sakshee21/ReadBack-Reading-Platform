@@ -7,6 +7,8 @@ import Library from "./pages/Library";
 import Reader from "./pages/Reader";
 import NotesPage from "./pages/NotesPage";
 import ThemesPage from "./pages/ThemesPage";
+import ResearchLibrary from "./pages/ResearchLibrary";
+import ResearchReader from "./pages/ResearchReader";
 
 function RequireAuth({ children }) {
   const { user, loading } = useAuth();
@@ -49,6 +51,22 @@ function AppRoutes() {
         element={
           <RequireAuth>
             <ThemesPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/research"
+        element={
+          <RequireAuth>
+            <ResearchLibrary />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/research/:documentId"
+        element={
+          <RequireAuth>
+            <ResearchReader />
           </RequireAuth>
         }
       />

@@ -1,12 +1,42 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { api, logEvent } from "../api";
 import { HIGHLIGHT_COLORS, colorLabel } from "../highlights/constants";
 import { isStale, paragraphStarts, selectionToRange, splitSegments } from "../highlights/positions";
+import { edgeScrollStep, usableBottom } from "../highlights/selectionScroll";
 import HighlightBar from "./HighlightBar";
 import CiteControl from "./CiteControl";
 
 const OVERLAP_MESSAGE = "That overlaps an existing highlight. Select it to edit instead.";
 const SAVE_FAILED = "Could not save that highlight. Try again.";
+
+const BAR_HEIGHT_VAR = "--hl-bar-height";
+
+/**
+ * Publish the bar height that the passage padding is sized from - but only
+ * when it has actually changed.
+ *
+ * Writing it unconditionally looks harmless and is not. The padding it drives
+ * is part of the document height, so clearing it shrinks the page, the
+ * browser clamps the scroll position upward to fit, and putting the value
+ * back does not restore where the reader was. Doing that on every selection
+ * change - which is what a drag produces, many times a second - makes the
+ * page jump up and down under the pointer.
+ */
+function publishBarHeight(bar, published) {
+  const root = document.documentElement;
+  if (!bar) {
+    if (published.current !== null) {
+      root.style.removeProperty(BAR_HEIGHT_VAR);
+      published.current = null;
+    }
+    return;
+  }
+  const height = Math.ceil(bar.getBoundingClientRect().height);
+  if (height !== published.current) {
+    root.style.setProperty(BAR_HEIGHT_VAR, `${height}px`);
+    published.current = height;
+  }
+}
 
 const byStart = (a, b) => a.start - b.start;
 const hueOf = (id) => HIGHLIGHT_COLORS.find((c) => c.id === id)?.hue;
@@ -25,6 +55,10 @@ export default function HighlightableText({
   focusHighlightId = null,
   onFocused,
   book = null,
+  // Passed straight to CiteControl. The research reader supplies journal and
+  // textbook-chapter formats and its own passage link; books use the defaults.
+  cite,
+  linkTo,
 }) {
   const textRef = useRef(null);
   const barRef = useRef(null);
@@ -33,6 +67,9 @@ export default function HighlightableText({
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // The bar height this passage has published, so it can tell a real change
+  // from a re-render and leave the page height alone on the latter.
+  const publishedBarHeight = useRef(null);
 
   const paragraphs = useMemo(() => paragraphStarts(text), [text]);
   const editing = editingId == null ? null : highlights.find((h) => h.id === editingId) || null;
@@ -85,6 +122,97 @@ export default function HighlightableText({
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [enabled, text]);
+
+  // Dragging a selection towards the bar scrolls the page instead of stopping
+  // at it. Without this the reader cannot select anything the bar covers: the
+  // pointer never reaches the bottom of the window, so the browser never
+  // starts its own auto-scroll.
+  useEffect(() => {
+    const container = textRef.current;
+    if (!enabled || !container) return undefined;
+
+    let frame = 0;
+    let pointerY = null;
+
+    const step = () => {
+      frame = 0;
+      if (pointerY == null) return;
+      // Dragged below the window, the browser does its own auto-scroll.
+      // Adding ours on top of it would scroll at double speed and overshoot.
+      if (pointerY > window.innerHeight) {
+        frame = requestAnimationFrame(step);
+        return;
+      }
+      const barHeight = barRef.current?.getBoundingClientRect().height ?? 0;
+      const amount = edgeScrollStep(pointerY, {
+        bottom: usableBottom(window.innerHeight, barHeight),
+      });
+      if (amount) {
+        // jsdom and older browsers do not implement scrollBy; a reader who
+        // cannot auto-scroll is no worse off than before this existed.
+        try {
+          window.scrollBy(0, amount);
+        } catch {
+          pointerY = null;
+          return;
+        }
+      }
+      frame = requestAnimationFrame(step);
+    };
+
+    const start = (e) => {
+      if (e.button !== 0) return; // left button / touch only
+      pointerY = e.clientY;
+      // An attribute on the body, not React state. Re-rendering mid-drag can
+      // replace the very text nodes the live selection points into, which
+      // drops the selection the reader is in the middle of making - so the
+      // one thing this must not do is cause a render.
+      document.body.dataset.hlSelecting = "true";
+      if (!frame) frame = requestAnimationFrame(step);
+    };
+    const move = (e) => {
+      if (pointerY != null) pointerY = e.clientY;
+    };
+    const stop = () => {
+      pointerY = null;
+      delete document.body.dataset.hlSelecting;
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+    };
+
+    container.addEventListener("pointerdown", start);
+    // On window, not the container: a drag normally ends outside the text.
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+    return () => {
+      container.removeEventListener("pointerdown", start);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+      if (frame) cancelAnimationFrame(frame);
+      delete document.body.dataset.hlSelecting;
+    };
+  }, [enabled]);
+
+  // The bar is as tall as its contents, so the room left for the passage
+  // underneath is measured rather than guessed. Runs after every render but
+  // only writes on a real change, and before paint, so the measurement and
+  // the padding it drives land together.
+  useLayoutEffect(() => {
+    publishBarHeight(barRef.current, publishedBarHeight);
+  });
+
+  // The bar can rewrap without React rendering anything, so re-measure on a
+  // resize; and let go of the variable when the passage goes away.
+  useEffect(() => {
+    const onResize = () => publishBarHeight(barRef.current, publishedBarHeight);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      publishBarHeight(null, publishedBarHeight);
+    };
+  }, []);
 
   // Arriving from the notes page: bring the highlight into view once.
   useEffect(() => {
@@ -234,7 +362,17 @@ export default function HighlightableText({
           quote={editing?.quote}
           initialColor={editing?.color}
           initialComment={editing?.comment || ""}
-          extra={editing && book ? <CiteControl book={book} highlight={editing} bookId={bookId} /> : null}
+          extra={
+            editing && book ? (
+              <CiteControl
+                book={book}
+                highlight={editing}
+                bookId={bookId}
+                {...(cite ? { cite } : {})}
+                {...(linkTo ? { linkTo } : {})}
+              />
+            ) : null
+          }
           error={error}
           busy={busy}
           onPickColor={(color, comment) => (editing ? update({ color }) : create(color, comment))}
