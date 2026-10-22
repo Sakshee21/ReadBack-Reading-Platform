@@ -34,6 +34,13 @@ class Settings(BaseSettings):
     # every Nth session rather than at every cliffhanger.
     upload_visualization_prompts: bool = True
     upload_visualization_every: int = 5
+    # Shelves: a reader's own groupings of books. Caps are per reader and
+    # exist so one account cannot fill the table, not because the numbers
+    # mean anything.
+    shelves_per_user: int = 20
+    books_per_shelf: int = 200
+    shelf_name_max: int = 40
+
     # Research documents (papers and textbooks). A separate track from the
     # reading-habit pilot, so it gets its own limits: a journal PDF is heavier
     # than a novel and a textbook is far longer, and neither is pilot content.

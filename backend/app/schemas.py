@@ -418,3 +418,51 @@ class ResearchTagStatusOut(BaseModel):
 
 class ConsentIn(BaseModel):
     consent: bool
+
+
+# ---------------------------------------------------------------------------
+# Shelves
+#
+# A reader's own groupings of books. Purely organisational: a shelf holds
+# references, so nothing here changes a book or what the reader sees in it.
+# ---------------------------------------------------------------------------
+
+
+def _clean_shelf_name(value: str) -> str:
+    name = " ".join(str(value or "").split())
+    if not name:
+        raise ValueError("a shelf needs a name")
+    if len(name) > 40:
+        raise ValueError("a shelf name can be at most 40 characters")
+    return name
+
+
+class ShelfIn(BaseModel):
+    name: str
+
+    @field_validator("name")
+    @classmethod
+    def _tidy(cls, value):
+        return _clean_shelf_name(value)
+
+
+class ShelfOut(BaseModel):
+    id: int
+    name: str
+    position: int
+    # Ids rather than whole books: the library already has the books, and a
+    # book on three shelves should not be sent three times.
+    book_ids: list[int] = []
+    book_count: int = 0
+    created_at: dt.datetime | None = None
+
+
+class ShelfBookIn(BaseModel):
+    book_id: int
+
+
+class ReorderIn(BaseModel):
+    """The ids in their new order. Anything left out keeps its place after
+    the ones listed, so a partial list is safe."""
+
+    ids: list[int] = Field(min_length=1, max_length=500)

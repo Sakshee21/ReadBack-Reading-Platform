@@ -264,6 +264,56 @@ class MicroSessionTheme(Base):
     __table_args__ = (UniqueConstraint("micro_session_id", "theme", "source", name="uq_msthemes_chunk_theme_source"),)
 
 
+class Shelf(Base):
+    """A reader's own grouping of books - "Crime", "To read".
+
+    Purely organisational: a shelf holds references, so putting a book on one
+    changes nothing about the book, and taking it off a shelf (or deleting the
+    shelf) leaves it in the library.
+    """
+
+    __tablename__ = "shelves"
+    __table_args__ = (
+        UniqueConstraint("user_id", "name_key", name="uq_shelf_user_name"),
+        Index("ix_shelves_user_position", "user_id", "position"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(40), nullable=False)
+    # The name folded for comparison, so "Crime" and "crime" cannot both
+    # exist. Stored rather than indexed as an expression, so the constraint
+    # does not depend on the database collation.
+    name_key: Mapped[str] = mapped_column(String(40), nullable=False)
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow)
+
+    books: Mapped[list["ShelfBook"]] = relationship(
+        back_populates="shelf",
+        cascade="all, delete-orphan",
+        order_by="ShelfBook.position",
+    )
+
+
+class ShelfBook(Base):
+    """One book on one shelf. A book may be on several shelves at once."""
+
+    __tablename__ = "shelf_books"
+
+    shelf_id: Mapped[int] = mapped_column(
+        ForeignKey("shelves.id", ondelete="CASCADE"), primary_key=True
+    )
+    book_id: Mapped[int] = mapped_column(
+        ForeignKey("books.id", ondelete="CASCADE"), primary_key=True
+    )
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    added_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow)
+
+    shelf: Mapped["Shelf"] = relationship(back_populates="books")
+
+
 class ResearchTag(Base):
     """One rhetorical tag on one chunk of a research document.
 

@@ -100,6 +100,20 @@ export const api = {
   prefetchThemes: (bookId, microSessionId) =>
     request(`/books/${bookId}/themes/prefetch`, { method: "POST", body: { micro_session_id: microSessionId } }),
 
+  // Shelves: a reader's own groupings of books. Organisational only - none of
+  // these change a book or what the reader sees in it.
+  listShelves: () => request("/shelves"),
+  createShelf: (name) => request("/shelves", { method: "POST", body: { name } }),
+  renameShelf: (id, name) => request(`/shelves/${id}`, { method: "PATCH", body: { name } }),
+  deleteShelf: (id) => request(`/shelves/${id}`, { method: "DELETE" }),
+  reorderShelves: (ids) => request("/shelves/reorder", { method: "POST", body: { ids } }),
+  addBookToShelf: (shelfId, bookId) =>
+    request(`/shelves/${shelfId}/books`, { method: "POST", body: { book_id: bookId } }),
+  removeBookFromShelf: (shelfId, bookId) =>
+    request(`/shelves/${shelfId}/books/${bookId}`, { method: "DELETE" }),
+  reorderShelfBooks: (shelfId, ids) =>
+    request(`/shelves/${shelfId}/books/reorder`, { method: "POST", body: { ids } }),
+
   // Research track. Separate endpoints throughout: a research document is not
   // a book and is never reachable through /books.
   listResearch: () => request("/research"),

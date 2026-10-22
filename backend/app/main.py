@@ -13,6 +13,7 @@ from app.routers import (
     pace,
     research,
     sessions,
+    shelves,
     streaks,
     themes,
 )
@@ -39,6 +40,7 @@ app.include_router(admin.router)
 app.include_router(highlights.router)
 app.include_router(themes.router)
 app.include_router(research.router)
+app.include_router(shelves.router)
 
 
 @app.get("/health")
