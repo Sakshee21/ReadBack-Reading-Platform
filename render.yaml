@@ -1,0 +1,43 @@
+# Render Blueprint: API (Docker, free) + frontend (static site, free).
+# The database is an external free Postgres (Neon) because Render's free
+# Postgres expires after 30 days. Values marked sync: false are entered in the
+# Render dashboard on first deploy.
+services:
+  - type: web
+    name: readback-api
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL        # postgresql+psycopg://...neon.tech/...?sslmode=require
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: CORS_ORIGINS        # JSON list, e.g. ["https://readback-web.onrender.com"]
+        sync: false
+      - key: LLM_PROVIDER
+        value: ollama
+      - key: OLLAMA_API_KEY
+        sync: false
+      - key: OLLAMA_MODEL        # direct API name, no -cloud suffix
+        sync: false
+      - key: THEME_TAGGING_ON_DEMAND
+        value: "true"
+
+  - type: web
+    name: readback-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL        # https://readback-api.onrender.com
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

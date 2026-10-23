@@ -8,6 +8,7 @@ Usage:
 
 import re
 import sys
+import time
 from pathlib import Path
 
 import httpx
@@ -29,10 +30,23 @@ GUTENDEX_URL = "https://gutendex.com/books/{id}/"
 HEADING_LINE_RE = re.compile(r"^\s*(CHAPTER|Chapter|Letter)\b[^\n]*\n?")
 
 
+def _get_with_retry(url: str, timeout: float, attempts: int = 5) -> httpx.Response:
+    """Gutendex and Gutenberg mirrors time out often; retry with backoff."""
+    for attempt in range(1, attempts + 1):
+        try:
+            resp = httpx.get(url, timeout=timeout, follow_redirects=True)
+            resp.raise_for_status()
+            return resp
+        except (httpx.TransportError, httpx.HTTPStatusError) as exc:
+            if attempt == attempts:
+                raise
+            wait = 5 * attempt
+            print(f"  {type(exc).__name__} fetching {url}; retry {attempt}/{attempts - 1} in {wait}s")
+            time.sleep(wait)
+
+
 def fetch_metadata(gutenberg_id: int) -> dict:
-    resp = httpx.get(GUTENDEX_URL.format(id=gutenberg_id), timeout=30, follow_redirects=True)
-    resp.raise_for_status()
-    return resp.json()
+    return _get_with_retry(GUTENDEX_URL.format(id=gutenberg_id), timeout=60).json()
 
 
 def fetch_text(metadata: dict) -> str:
@@ -43,8 +57,7 @@ def fetch_text(metadata: dict) -> str:
     )
     if not text_url:
         raise RuntimeError(f"No plain-text format available for book {metadata.get('id')}")
-    resp = httpx.get(text_url, timeout=60, follow_redirects=True)
-    resp.raise_for_status()
+    resp = _get_with_retry(text_url, timeout=90)
     # Gutenberg plain-text files are UTF-8; httpx's guessed encoding (from
     # headers/chardet) is sometimes wrong and mangles smart quotes/em-dashes,
     # so decode explicitly rather than trusting resp.text.
